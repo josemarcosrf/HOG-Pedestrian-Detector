@@ -1,0 +1,3 @@
+20		% chunk_size
+10		% n_neg_windows 
+3780 	% desc_size (15x7x4x9)

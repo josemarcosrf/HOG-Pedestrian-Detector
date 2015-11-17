@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of get_scale_space_pyramid_images</title>
+  <meta name="keywords" content="get_scale_space_pyramid_images">
+  <meta name="description" content="GET_SCALE_SPACE_PYRAMID_IMAGES retrieves every window image in a">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; get_scale_space_pyramid_images.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>get_scale_space_pyramid_images
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>GET_SCALE_SPACE_PYRAMID_IMAGES retrieves every window image in a</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [pyramid, coordinates] = get_scale_space_pyramid_images(I,scale,stride, show) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> GET_SCALE_SPACE_PYRAMID_IMAGES retrieves every window image in a 
+                                scale-space-pyramid structure.
+
+ INPUT:
+       I: image to process
+       scale: scaling ratio between levels
+       stride: sampling pixel distance between two consecutive windows
+
+ OUTPUT:
+       pyramid: cell array pyramid strctured with every window indexed
+                by level and numer of window within that level.
+       coordiantes: coordinates of each window referenced to the level 0
+                    pyramid layer.
+
+$ Author: Jose Marcos Rodriguez $ 
+$ Date: N/D $ 
+$ Revision : 1.00 $ 
+% FILENAME  : get_scale_space_pyramid_images.m</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>	GET_PARAMS retrieve params saved in a .mat file</li><li><a href="get_pyramid_dimensions.html" class="code" title="function [num_levels, num_windows, windows_per_level] = get_pyramid_dimensions(I)">get_pyramid_dimensions</a>	GET_PYRAMID_DIMENSIONS function to compute the pyramid dimensions</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="get_pyramid_hogs.html" class="code" title="function [hogs,windows,wxl,coordinates] = get_pyramid_hogs(I, desc_size, scale, stride)">get_pyramid_hogs</a>	GET_PYRAMID_HOGS function computes de HOG descriptor for all the</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function [windows, coordinates] = get_windows(I,stride, show)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [pyramid, coordinates] = get_scale_space_pyramid_images(I,scale,stride, show)</a>
+0002 <span class="comment">% GET_SCALE_SPACE_PYRAMID_IMAGES retrieves every window image in a</span>
+0003 <span class="comment">%                                scale-space-pyramid structure.</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% INPUT:</span>
+0006 <span class="comment">%       I: image to process</span>
+0007 <span class="comment">%       scale: scaling ratio between levels</span>
+0008 <span class="comment">%       stride: sampling pixel distance between two consecutive windows</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% OUTPUT:</span>
+0011 <span class="comment">%       pyramid: cell array pyramid strctured with every window indexed</span>
+0012 <span class="comment">%                by level and numer of window within that level.</span>
+0013 <span class="comment">%       coordiantes: coordinates of each window referenced to the level 0</span>
+0014 <span class="comment">%                    pyramid layer.</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0017 <span class="comment">%$ Date: N/D $</span>
+0018 <span class="comment">%$ Revision : 1.00 $</span>
+0019 <span class="comment">%% FILENAME  : get_scale_space_pyramid_images.m</span>
+0020 
+0021     <span class="comment">% pre allocating memory</span>
+0022     [levels, num_windows,~] = <a href="get_pyramid_dimensions.html" class="code" title="function [num_levels, num_windows, windows_per_level] = get_pyramid_dimensions(I)">get_pyramid_dimensions</a>(I);
+0023     coordinates = zeros(2,num_windows);
+0024     pyramid = cell(1,levels);
+0025     coord_indx = 1;
+0026     level = 1;
+0027     
+0028     params = <a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>(<span class="string">'window_params'</span>);
+0029     window_v_size = params.height;
+0030     window_h_size = params.width;
+0031 
+0032     [height,width, ~] = size(I);
+0033     sub_level_image = imresize(I,1);
+0034     
+0035     <span class="keyword">while</span> height &gt;= window_v_size &amp;&amp; width &gt;= window_h_size
+0036         <span class="comment">% showing the sub-level image</span>
+0037         title = strcat(<span class="string">'level '</span>,int2str(level));
+0038         <span class="keyword">if</span> show
+0039             figure(<span class="string">'name'</span>, title); 
+0040             imshow(sub_level_image)
+0041         <span class="keyword">end</span>
+0042         
+0043         <span class="comment">% getting windows over the sub-level image</span>
+0044         [pyramid{level}, coords] = <a href="#_sub1" class="code" title="subfunction [windows, coordinates] = get_windows(I,stride, show)">get_windows</a>(sub_level_image,stride,show);
+0045         <span class="keyword">for</span> c=1:size(coords,2)
+0046             coordinates(1,coord_indx) = coords(1,c);
+0047             coordinates(2,coord_indx) = coords(2,c);
+0048             coord_indx = coord_indx + 1;
+0049         <span class="keyword">end</span>
+0050         <span class="comment">% accesing example to a given window number and level</span>
+0051         <span class="comment">% window1 = pyramid{level}(:,:,:,1);</span>
+0052         <span class="comment">% window2 = pyramid{level}(:,:,:,2);</span>
+0053 
+0054         <span class="comment">% continue re-scaling the image</span>
+0055         sub_level_image = imresize(sub_level_image, 1.0/scale);
+0056         [height,width, ~] = size(sub_level_image);
+0057 
+0058         <span class="comment">% updating level values</span>
+0059         level = level + 1;
+0060     <span class="keyword">end</span>
+0061     
+0062     
+0063     
+0064     <span class="comment">%% AUX function to get all window from an image</span>
+0065     <a name="_sub1" href="#_subfunctions" class="code">function [windows, coordinates] = get_windows(I,stride, show)</a>
+0066         
+0067         <span class="comment">% window and image size</span>
+0068         [im_v_size,im_h_size,~] = size(I);
+0069         
+0070         <span class="comment">% number of vertical and horitzontal windows</span>
+0071         <span class="comment">% assuming at least one window fits over the image , so:</span>
+0072         <span class="comment">% we'll have 1 window + N sliding windows...</span>
+0073         num_V_windows = floor((im_v_size-window_v_size)/stride)+1;
+0074         num_H_windows = floor((im_h_size-window_h_size)/stride)+1;
+0075 
+0076         <span class="comment">% remaining pixels between last window and image border</span>
+0077         V_margin = im_v_size - (num_V_windows-1)*stride - window_v_size;
+0078         H_margin = im_h_size - (num_H_windows-1)*stride - window_h_size;
+0079         
+0080         <span class="comment">% computing offset</span>
+0081         V_offset = floor(V_margin/2);
+0082         H_offset = floor(H_margin/2);
+0083 
+0084 <span class="comment">%         fprintf('num horitzontal windows: %d \n',num_H_windows)</span>
+0085 <span class="comment">%         fprintf('num vertical windows: %d \n',num_V_windows)</span>
+0086         
+0087         <span class="comment">% retrieving windows</span>
+0088         <span class="keyword">if</span> show
+0089             figure(<span class="string">'name'</span>, <span class="string">'windows'</span>);
+0090         <span class="keyword">end</span>
+0091 
+0092         windows = uint8(zeros(128,64,size(I,3),num_V_windows*num_H_windows));
+0093         coordinates = uint8(zeros(2,num_V_windows*num_H_windows));
+0094 
+0095         <span class="comment">% all vertical windows</span>
+0096         index = 1;
+0097         v_ini = 1 + V_offset;
+0098 
+0099         <span class="keyword">for</span> i=1:num_V_windows
+0100             h_ini = 1 + H_offset;
+0101             v_fin = v_ini + window_v_size-1;
+0102             
+0103             <span class="comment">% all horitzontal windows</span>
+0104             <span class="keyword">for</span> j=1:num_H_windows
+0105                 coordinates(1, index) = h_ini;
+0106                 coordinates(2, index) = v_ini;
+0107             
+0108                 h_fin = h_ini + window_h_size-1;
+0109                 windows(:,:,:,index) = I(v_ini:v_fin,h_ini:h_fin,:); 
+0110                 
+0111                 <span class="comment">% showing windows</span>
+0112                 <span class="keyword">if</span> show
+0113                     subplot(num_V_windows,num_H_windows,index);
+0114                     subimage(windows(:,:,:,index));
+0115                 <span class="keyword">end</span>
+0116                 
+0117                 <span class="comment">% moving window</span>
+0118                 h_ini = h_ini + stride;
+0119                 index = index + 1;
+0120             <span class="keyword">end</span>
+0121             
+0122             v_ini = v_ini + stride;
+0123         <span class="keyword">end</span>
+0124     <span class="keyword">end</span>
+0125 <span class="keyword">end</span>
+0126     
+0127     
+0128</pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

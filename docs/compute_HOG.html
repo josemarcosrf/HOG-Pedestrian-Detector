@@ -1,0 +1,212 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of compute_HOG</title>
+  <meta name="keywords" content="compute_HOG">
+  <meta name="description" content="COMPUTE_HOG Computes the HOG descriptor of the given image computed">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; compute_HOG.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>compute_HOG
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>COMPUTE_HOG Computes the HOG descriptor of the given image computed</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function H = compute_HOG(I, cell_size, block_size,n_bins) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> COMPUTE_HOG Computes the HOG descriptor of the given image computed
+             with the specified paramters.
+
+ INPUT:
+       I: image to extract HOGs
+       cell_size: size of the cells in pixels
+       block_size: size of the blocks in cells
+       n_bins: number of bins of the histograms
+
+ OUTPUT: 
+       H: HoG descriptor in a column vector form.
+
+
+$ Author Jose Marcos Rodriguez $    
+$ Date: 2013/20/08 22:00:00 $    
+$ Revision: 1.1 $</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="compute_cell_coordinates.html" class="code" title="function windows=compute_cell_coordinates(I,wx_size, wy_size)">compute_cell_coordinates</a>	COMPUTE_CELL_COORDINATES Function to divide the input image(I)</li><li><a href="compute_gradient.html" class="code" title="function [angles,magnitudes] = compute_gradient(I)">compute_gradient</a>	COMPUTE_GRADIENT Function to compute the image gradient in polar form</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="get_feature_matrix.html" class="code" title="function [labels, train_matrix] = get_feature_matrix(positive_images, negative_images)">get_feature_matrix</a>	GET_FEATURE_MATRIX computes the descriptor matrix for all input images</li><li><a href="get_pyramid_hogs.html" class="code" title="function [hogs,windows,wxl,coordinates] = get_pyramid_hogs(I, desc_size, scale, stride)">get_pyramid_hogs</a>	GET_PYRAMID_HOGS function computes de HOG descriptor for all the</li><li><a href="plot_DETcurve.html" class="code" title="function plot_DETcurve(models, model_names,pos_path, neg_path)">plot_DETcurve</a>	PLOT_DETCURVE function to compute de DET plot given a set of models</li><li><a href="plot_reject_curves.html" class="code" title="function plot_reject_curves(model,paths)">plot_reject_curves</a>	PLOT_REJECT_CURVES Tests a (lib)SVM classifier from the specified images</li><li><a href="test_svm.html" class="code" title="function statistics = test_svm(model,paths)">test_svm</a>	TEST_SVM Tests a (lib)SVM classifier from the specified images paths</li><li><a href="test_svm_PCA.html" class="code" title="function statistics = test_svm_PCA(model,Ureduce, paths)">test_svm_PCA</a>	TEST_SVM_PCA Tests a (lib)SVM classifier from the specified images paths</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function H = compute_HOG(I, cell_size, block_size,n_bins)</a>
+0002 <span class="comment">% COMPUTE_HOG Computes the HOG descriptor of the given image computed</span>
+0003 <span class="comment">%             with the specified paramters.</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% INPUT:</span>
+0006 <span class="comment">%       I: image to extract HOGs</span>
+0007 <span class="comment">%       cell_size: size of the cells in pixels</span>
+0008 <span class="comment">%       block_size: size of the blocks in cells</span>
+0009 <span class="comment">%       n_bins: number of bins of the histograms</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% OUTPUT:</span>
+0012 <span class="comment">%       H: HoG descriptor in a column vector form.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">%$ Author Jose Marcos Rodriguez $</span>
+0016 <span class="comment">%$ Date: 2013/20/08 22:00:00 $</span>
+0017 <span class="comment">%$ Revision: 1.1 $</span>
+0018 
+0019 <span class="comment">%% Setting gradient configuration</span>
+0020 <span class="comment">% gradient angle range control</span>
+0021 epsilon = 0.0001;
+0022 L_norm = 2;
+0023 desp = 1;
+0024 total_angles = 180.0;
+0025 bin_width = total_angles/n_bins;
+0026 
+0027 <span class="comment">%% column matrix for mapping indices to bin center values</span>
+0028 bin_centers_map = (bin_width/2:bin_width:total_angles)';
+0029 
+0030 <span class="comment">%% Compute the gradient in polar coordinates</span>
+0031 [angles, magnitudes] = <a href="compute_gradient.html" class="code" title="function [angles,magnitudes] = compute_gradient(I)">compute_gradient</a>(I);
+0032 
+0033 <span class="comment">%% Split the gradient in cells</span>
+0034 cell_coords = <a href="compute_cell_coordinates.html" class="code" title="function windows=compute_cell_coordinates(I,wx_size, wy_size)">compute_cell_coordinates</a>(angles,cell_size,cell_size,false);
+0035 
+0036 <span class="comment">%% initialize 3 dimensional matrix to hold all the histograms</span>
+0037 <span class="comment">% number of vertical and horizontal cells</span>
+0038 [height,width] = size(I(:,:,1));
+0039 n_v_cells = floor(height/cell_size);
+0040 n_h_cells = floor(width/cell_size);
+0041 
+0042 <span class="comment">% init the histograms 3D matrix (7x14x9)</span>
+0043 histograms = zeros(n_v_cells,n_h_cells,n_bins);
+0044 
+0045 
+0046 
+0047 <span class="comment">% ================================================</span>
+0048 <span class="comment">%% Computing histograms for all image cells</span>
+0049 <span class="comment">% ================================================</span>
+0050 <span class="keyword">for</span> index=1:size(cell_coords,2)
+0051     
+0052     <span class="comment">% current cell histogram initialization</span>
+0053     h = zeros(1,n_bins);
+0054     
+0055     <span class="comment">% cell coords</span>
+0056     x_min = cell_coords(1,index);
+0057     x_max = cell_coords(2,index);
+0058     y_min = cell_coords(3,index);
+0059     y_max = cell_coords(4,index);
+0060 
+0061     <span class="comment">% retrieve angles and magnitudes for all the pixels in the</span>
+0062     <span class="comment">% cell and conversion to degrees.</span>
+0063     angs = angles(y_min:y_max,x_min:x_max);
+0064     angs = angs.*180/pi;
+0065     mags = magnitudes(y_min:y_max,x_min:x_max);
+0066 
+0067     <span class="comment">% indices for the left and right histogram bins that bound</span>
+0068     <span class="comment">% the current angle value for all the pixels in the cell</span>
+0069     left_indices = round(angs/bin_width);
+0070     right_indices = left_indices+1;
+0071 
+0072     <span class="comment">% wraping contributions over the histogram boundaries.</span>
+0073     left_indices(left_indices==0) = 9;
+0074     right_indices(right_indices==10) = 1;
+0075     
+0076     <span class="comment">% retrieving the left bin center value.</span>
+0077     left_bin_centers = bin_centers_map(left_indices);
+0078     angs(angs &lt; left_bin_centers) = <span class="keyword">...</span>
+0079         total_angles + angs(angs &lt; left_bin_centers);
+0080     
+0081     
+0082     <span class="comment">% calculating the contribution to both bins sides (vote weight)</span>
+0083     <span class="comment">% (matrices with same size as the cell)</span>
+0084     right_contributions = (angs-left_bin_centers)/bin_width;
+0085     left_contributions = 1 - right_contributions;
+0086     left_contributions = mags.*left_contributions;
+0087     right_contributions = mags.*right_contributions;
+0088     
+0089 
+0090     <span class="comment">% computing contributions for the current histogram bin by bin.</span>
+0091     <span class="keyword">for</span> bin=1:n_bins
+0092         <span class="comment">% pixels that contribute to the bin with its left portion</span>
+0093         pixels_to_left = (left_indices == bin);
+0094         h(bin) = h(bin) + sum(left_contributions(pixels_to_left));
+0095         
+0096         <span class="comment">% pixels that contribute to the bin with its right portion</span>
+0097         pixels_to_right = (right_indices == bin);
+0098         h(bin) = h(bin) + sum(right_contributions(pixels_to_right));
+0099     <span class="keyword">end</span>
+0100 
+0101     <span class="comment">% appending current hist. to the histograms matrix</span>
+0102     row_offset = floor(index/n_h_cells + 1);
+0103     column_offset = mod(index-1,n_h_cells)+1;
+0104     histograms(row_offset,column_offset,:) = h(1,:);
+0105 
+0106 <span class="keyword">end</span>
+0107 
+0108 <span class="comment">% ================================================</span>
+0109 <span class="comment">%%          block normalization (L2 norm)</span>
+0110 <span class="comment">% ================================================</span>
+0111 hist_size = block_size*block_size*n_bins;
+0112 descriptor_size = hist_size*(n_v_cells-block_size+desp)*(n_h_cells-block_size+desp);
+0113 H = zeros(descriptor_size, 1);
+0114 col = 1;
+0115 row = 1;
+0116 <span class="comment">% H = [];</span>
+0117 
+0118 <span class="comment">%% Split the histogram matrix in blocks (this code assumes an 50% of overlap as desp is hard coded as 1)</span>
+0119 <span class="keyword">while</span> row &lt;= n_v_cells-block_size+1
+0120     <span class="keyword">while</span> col &lt;= n_h_cells-block_size+1
+0121         
+0122         <span class="comment">% Getting all the histograms for a block</span>
+0123         blockHists = <span class="keyword">...</span>
+0124             histograms(row:row+block_size-1, col:col+block_size-1, :);
+0125         
+0126         <span class="comment">% Getting the magnitude of the histograms of the block</span>
+0127         magnitude = norm(blockHists(:),L_norm);
+0128     
+0129         <span class="comment">% Divide all of the histogram values by the magnitude to normalize</span>
+0130         <span class="comment">% them.</span>
+0131         normalized = blockHists / (magnitude + epsilon);
+0132 
+0133         <span class="comment">% H = [H; normalized(:)];</span>
+0134         offset = (row-1)*(n_h_cells-block_size+1)+col;
+0135         ini = (offset-1)*hist_size+1;
+0136         fin = offset*hist_size;
+0137 
+0138         H(ini:fin,1) = normalized(:);
+0139 
+0140         col = col+desp;
+0141     <span class="keyword">end</span>
+0142     row = row+desp;
+0143     col = 1;
+0144 <span class="keyword">end</span>
+0145 
+0146 
+0147 
+0148 
+0149 
+0150</pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

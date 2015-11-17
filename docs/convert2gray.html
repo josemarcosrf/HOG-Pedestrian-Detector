@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of convert2gray</title>
+  <meta name="keywords" content="convert2gray">
+  <meta name="description" content="CONVERT2GRAY converts to gray all JPG, PNG or PPM images found in">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; convert2gray.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>convert2gray
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>CONVERT2GRAY converts to gray all JPG, PNG or PPM images found in</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function convert2gray() </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> CONVERT2GRAY converts to gray all JPG, PNG or PPM images found in 
+              the specified folder and saves the results in the desired
+              output path.
+
+$ Author: Jose Marcos Rodriguez $ 
+$ Date: 17-Dec-2013 18:48:28 $ 
+$ Revision : 1.00 $ 
+% FILENAME  : convert2gray.m</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>	GET_PARAMS retrieve params saved in a .mat file</li><li><a href="get_window.html" class="code" title="function image_window = get_window(I,W,H, method)">get_window</a>	GET_WINDOW Gets a WxH window from the input image (I) with method</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function convert2gray()</a>
+0002 <span class="comment">% CONVERT2GRAY converts to gray all JPG, PNG or PPM images found in</span>
+0003 <span class="comment">%              the specified folder and saves the results in the desired</span>
+0004 <span class="comment">%              output path.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0007 <span class="comment">%$ Date: 17-Dec-2013 18:48:28 $</span>
+0008 <span class="comment">%$ Revision : 1.00 $</span>
+0009 <span class="comment">%% FILENAME  : convert2gray.m</span>
+0010 
+0011 
+0012 origin_path = uigetdir(<span class="string">'images'</span>,<span class="string">'Select origin folder'</span>);
+0013 dest_path = uigetdir(<span class="string">'images'</span>,<span class="string">'Select destination image folder'</span>);
+0014 wildcards = {<span class="string">'*.jpg'</span>,<span class="string">'*.png'</span>,<span class="string">'*.ppm'</span>};
+0015 w_params = <a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>(<span class="string">'window_params'</span>);
+0016 w = w_params.width; 
+0017 h = w_params.heigth;
+0018 
+0019 <span class="comment">% reading images</span>
+0020 images = [];
+0021 <span class="keyword">for</span> i=1:numel(wildcards)
+0022     wildcard = strcat(origin_path,filesep,wildcards{i});
+0023     images = [images; rdir(wildcard)];
+0024 <span class="keyword">end</span>
+0025 
+0026 disp(numel(images))
+0027 
+0028 <span class="keyword">for</span> i=1:numel(images)
+0029    <span class="comment">% Image info [path, name, ext]</span>
+0030    [~, name, ~] = fileparts(images(i).name);
+0031    fprintf(<span class="string">'Converting image: %s\n'</span>,name);
+0032    
+0033    <span class="comment">% getting centered window from the original image</span>
+0034    I = imread(images(i).name);
+0035    window = <a href="get_window.html" class="code" title="function image_window = get_window(I,W,H, method)">get_window</a>(I,w,h,<span class="string">'center'</span>);
+0036    window = rgb2gray(window);
+0037    
+0038    <span class="comment">% saving gray image</span>
+0039    imwrite(window, strcat(dest_path,filesep,name,<span class="string">'.png'</span>)); 
+0040 <span class="keyword">end</span>
+0041 
+0042 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

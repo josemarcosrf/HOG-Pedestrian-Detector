@@ -1,0 +1,4 @@
+0.92	% threshold
+1.2		% scale
+3780	% desc_size (15x7x4x9)
+8		% stride

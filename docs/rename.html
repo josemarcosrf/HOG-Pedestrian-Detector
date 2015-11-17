@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of rename</title>
+  <meta name="keywords" content="rename">
+  <meta name="description" content="RENAME function to rename all the variable names of the model">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; rename.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>rename
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>RENAME function to rename all the variable names of the model</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function rename(path,ext) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> RENAME function to rename all the variable names of the model
+ inside of the .mat file as the name of the .mat file.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function rename(path,ext)</a>
+0002 <span class="comment">% RENAME function to rename all the variable names of the model</span>
+0003 <span class="comment">% inside of the .mat file as the name of the .mat file.</span>
+0004 
+0005     files = rdir([path,<span class="string">'\*'</span>,ext]);
+0006     
+0007     <span class="keyword">for</span> i=1:size(files)
+0008         file = files(i).name;
+0009         [~, name, ~]= fileparts(file);
+0010         
+0011         struct = load(file);
+0012         <span class="keyword">if</span> max(size(fieldnames(struct))) == 1
+0013             fprintf(<span class="string">'renaming file %s...\n'</span>,name);
+0014             old_name = fieldnames(struct);  <span class="comment">% as only has one field</span>
+0015             s.(name) = getfield(struct,old_name{1}); <span class="comment">% return the name as cell</span>
+0016             save(file,<span class="string">'-struct'</span>,<span class="string">'s'</span>,name);
+0017             
+0018         <span class="keyword">else</span>
+0019             fprintf(<span class="string">'file %s skipped.\n'</span>,name);
+0020         <span class="keyword">end</span>
+0021     <span class="keyword">end</span>
+0022 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

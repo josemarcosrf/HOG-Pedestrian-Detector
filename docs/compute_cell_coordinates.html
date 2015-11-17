@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of compute_cell_coordinates</title>
+  <meta name="keywords" content="compute_cell_coordinates">
+  <meta name="description" content="COMPUTE_CELL_COORDINATES Function to divide the input image(I)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; compute_cell_coordinates.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>compute_cell_coordinates
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>COMPUTE_CELL_COORDINATES Function to divide the input image(I)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function windows=compute_cell_coordinates(I,wx_size, wy_size) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> COMPUTE_CELL_COORDINATES Function to divide the input image(I) 
+                          in windows of the specified size.
+
+ INPUT:
+       img: image to split
+       w_size: window size in px
+       windows: matrix with the chunked image indices in 1 row and 4 columns
+                in the following format: [x_ini]
+                                         [x_fin]
+                                         [y_ini]    
+                                         [y_fin]
+
+
+$ Author: Jose Marcos Rodriguez $ 
+$ Date: N/D $ 
+$ Revision : 1.00 $ 
+% FILENAME  : compute_cell_coordinates.m</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="compute_HOG.html" class="code" title="function H = compute_HOG(I, cell_size, block_size,n_bins)">compute_HOG</a>	COMPUTE_HOG Computes the HOG descriptor of the given image computed</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function windows=compute_cell_coordinates(I,wx_size, wy_size)</a>
+0002 <span class="comment">% COMPUTE_CELL_COORDINATES Function to divide the input image(I)</span>
+0003 <span class="comment">%                          in windows of the specified size.</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% INPUT:</span>
+0006 <span class="comment">%       img: image to split</span>
+0007 <span class="comment">%       w_size: window size in px</span>
+0008 <span class="comment">%       windows: matrix with the chunked image indices in 1 row and 4 columns</span>
+0009 <span class="comment">%                in the following format: [x_ini]</span>
+0010 <span class="comment">%                                         [x_fin]</span>
+0011 <span class="comment">%                                         [y_ini]</span>
+0012 <span class="comment">%                                         [y_fin]</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0016 <span class="comment">%$ Date: N/D $</span>
+0017 <span class="comment">%$ Revision : 1.00 $</span>
+0018 <span class="comment">%% FILENAME  : compute_cell_coordinates.m</span>
+0019 
+0020 <span class="comment">%% window size cheking</span>
+0021 [r,c] = size(I(:,:,1));
+0022 <span class="keyword">if</span> wx_size &gt; c || wy_size &gt; r
+0023     fprintf(<span class="string">'window size greater than image size: r=%d, c=%d \n'</span>,r,c);
+0024 <span class="keyword">end</span>
+0025 
+0026 <span class="comment">%% image chunking</span>
+0027 x_segs = floor(c/wx_size);
+0028 y_segs = floor(r/wy_size);
+0029 
+0030 
+0031 <span class="comment">%% more Matlab way of doing</span>
+0032 xs_ini(1:x_segs) = wx_size*((1:x_segs)-1)+1;     <span class="comment">% x_ini</span>
+0033 xs_fin(1:x_segs) = wx_size*min((1:x_segs),c);    <span class="comment">% x_fin</span>
+0034 ys_ini(1:y_segs) = wy_size*((1:y_segs)-1)+1;     <span class="comment">% y_ini</span>
+0035 ys_fin(1:y_segs) = wy_size*min((1:y_segs),r);    <span class="comment">% y_fin</span>
+0036 
+0037 [X_ini,Y_ini] = meshgrid(ys_ini,xs_ini);
+0038 [X_fin,Y_fin] = meshgrid(ys_fin,xs_fin);
+0039 windows = [Y_ini(:),Y_fin(:),X_ini(:),X_fin(:)]';
+0040 
+0041 
+0042 <span class="comment">%% Equivalent to but slightly slower: (just left here for clearness)</span>
+0043 <span class="comment">% fprintf('X segments: %d, Y segments: %d \n', x_segs, y_segs);</span>
+0044 <span class="comment">% if subPlot</span>
+0045 <span class="comment">%     figure('name', 'partitions');</span>
+0046 <span class="comment">% end</span>
+0047 <span class="comment">% windows = zeros(4,y_segs*x_segs);</span>
+0048 <span class="comment">% for i=1:x_segs</span>
+0049 <span class="comment">%     for j=1:y_segs</span>
+0050 <span class="comment">%</span>
+0051 <span class="comment">%         % windows coordinates calculations</span>
+0052 <span class="comment">%         x_ini = wx_size*(i-1)+1;</span>
+0053 <span class="comment">%         x_fin = min(wx_size*i,c);</span>
+0054 <span class="comment">%         y_ini = wy_size*(j-1)+1;</span>
+0055 <span class="comment">%         y_fin = min(wy_size*j, r);</span>
+0056 <span class="comment">%</span>
+0057 <span class="comment">%         % saving coordinates in the 'windows' array</span>
+0058 <span class="comment">%         col = (j-1)*x_segs+i;</span>
+0059 <span class="comment">%         windows(1,col) = x_ini;</span>
+0060 <span class="comment">%         windows(2,col) = x_fin;</span>
+0061 <span class="comment">%         windows(3,col) = y_ini;</span>
+0062 <span class="comment">%         windows(4,col) = y_fin;</span>
+0063 <span class="comment">%</span>
+0064 <span class="comment">%         % showing the partitions</span>
+0065 <span class="comment">%         if subPlot==true</span>
+0066 <span class="comment">%             subplot(y_segs,x_segs,col),</span>
+0067 <span class="comment">%             subimage(I(y_ini:y_fin,x_ini:x_fin,:));</span>
+0068 <span class="comment">%         end</span>
+0069 <span class="comment">%     end</span>
+0070 <span class="comment">% end</span>
+0071 
+0072         
+0073</pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

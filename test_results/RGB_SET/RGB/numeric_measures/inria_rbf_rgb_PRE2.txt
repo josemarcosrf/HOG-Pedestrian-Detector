@@ -1,0 +1,11 @@
+oks: 2368 
+kos: 117 
+false positives: 41 
+false negatives: 76 
+true positives: 1050 
+true negatives: 1318 
+mis rate: 6.749556e-02 
+fppw: 1.649899e-02 
+Precision 9.624198e-01 
+Recall 9.325044e-01 
+F score 9.472260e-01 

@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of cross_validate</title>
+  <meta name="keywords" content="cross_validate">
+  <meta name="description" content="CROSS_VALIDATE Tests a (lib)SVM classifier from the specified image paths">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; cross_validate.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>cross_validate
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>CROSS_VALIDATE Tests a (lib)SVM classifier from the specified image paths</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function svm_params = cross_validate(kernel_type, cost_range, gamma_range, train_matrix, labels, model_save_path) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> CROSS_VALIDATE Tests a (lib)SVM classifier from the specified image paths
+
+ INPUT:
+       kernel_type: svm kernel function (linear or rbf)
+       cost_range, gamma_range: cost and gamma values to cross validate 
+       train_matrix: training matrix (rows: cases, columns: features)
+       labels: columns matrix with th training cases labels
+       model_save_path: path where to save the final svm model
+
+ OUTPUTS:
+       svm_params: string in libSBM format with the best parameters found.
+
+$ Author: Jose Marcos Rodriguez $    
+$ Date: 2013/11/09 $    
+$ Revision: 1.00 $</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="train_svm.html" class="code" title="function new_model = train_svm(model_name, paths)">train_svm</a>	TRAIN_SVM Train an SVM classifier with the specified images.</li><li><a href="train_svm_PCA.html" class="code" title="function [new_model,Ureduce] = train_svm_PCA(model_name, paths)">train_svm_PCA</a>	TRAIN_SVM_PCA Train an SVM classifier with the specified images.</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function svm_params = cross_validate(kernel_type, cost_range, gamma_range, train_matrix, labels, model_save_path)</a>
+0002 <span class="comment">% CROSS_VALIDATE Tests a (lib)SVM classifier from the specified image paths</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% INPUT:</span>
+0005 <span class="comment">%       kernel_type: svm kernel function (linear or rbf)</span>
+0006 <span class="comment">%       cost_range, gamma_range: cost and gamma values to cross validate</span>
+0007 <span class="comment">%       train_matrix: training matrix (rows: cases, columns: features)</span>
+0008 <span class="comment">%       labels: columns matrix with th training cases labels</span>
+0009 <span class="comment">%       model_save_path: path where to save the final svm model</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% OUTPUTS:</span>
+0012 <span class="comment">%       svm_params: string in libSBM format with the best parameters found.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0015 <span class="comment">%$ Date: 2013/11/09 $</span>
+0016 <span class="comment">%$ Revision: 1.00 $</span>
+0017     
+0018     
+0019     fprintf(<span class="string">'Beginning crossvalidation\n'</span>)
+0020     log = <span class="string">''</span>;
+0021     crossval_start = tic;
+0022     
+0023     <span class="comment">% ---------------------------------------------------------------------</span>
+0024     <span class="comment">%% Radial Basis Function</span>
+0025     <span class="comment">% ---------------------------------------------------------------------</span>
+0026     <span class="keyword">if</span> strcmp(kernel_type, <span class="string">'rbf'</span>)
+0027         crossval_matrix = zeros(numel(gamma_range), numel(cost_range));
+0028         best_cv = 0;
+0029         best_g = 0;
+0030         best_c = 0;
+0031         k = 3;  <span class="comment">% number of folds</span>
+0032 
+0033         <span class="keyword">for</span> g_ind=1:numel(gamma_range)
+0034             g = gamma_range(g_ind);
+0035             <span class="keyword">for</span> c_ind=1:numel(cost_range)
+0036                 c = cost_range(c_ind);
+0037                 svm_params = [<span class="string">'-q -v '</span>, num2str(k), <span class="string">' -t '</span>, num2str(2),<span class="string">' -g '</span>, num2str(g),<span class="string">' -c '</span>, num2str(c)];
+0038                 cv = svmtrain(labels, train_matrix, svm_params);
+0039                 crossval_matrix(g_ind, c_ind) = cv;
+0040                 fprintf(<span class="string">'&lt;gamma=%d, cost=%d&gt; \n\n'</span>,g,c);
+0041                 
+0042                 <span class="comment">% writing crossvalidation log file</span>
+0043                 log_file = fopen([model_save_path,<span class="string">'.cv'</span>],<span class="string">'a'</span>);
+0044                 fprintf(log_file, sprintf(<span class="string">'&lt;gamma=%f, cost=%f&gt;: acc=%f \n\n'</span>,g,c,cv));
+0045                 fclose(log_file);
+0046 
+0047                 <span class="comment">% updating best cv value</span>
+0048                 <span class="keyword">if</span> (cv &gt;= best_cv),
+0049                     best_cv = cv; 
+0050                     best_g = g;
+0051                     best_c = c;
+0052                 <span class="keyword">end</span>
+0053             <span class="keyword">end</span>
+0054         <span class="keyword">end</span>
+0055 
+0056         crossval_elapsed = toc(crossval_start);
+0057         fprintf(<span class="string">'SVM crosvalidation done in: %f seconds.\n'</span>,crossval_elapsed);
+0058 
+0059         <span class="comment">% final training params</span>
+0060         fprintf(<span class="string">'Best crossval reached: %d, with gamma=%d, cost=%d\n\n'</span>, best_cv, best_g, best_c);
+0061         svm_params = [<span class="string">'-q -t '</span>, num2str(2),<span class="string">' -g '</span>, num2str(best_g),<span class="string">' -c '</span>, num2str(best_c),<span class="string">' -b 1'</span>];
+0062 
+0063         <span class="comment">% Plot the cross validation grid</span>
+0064         figure;
+0065         imagesc(crossval_matrix'); colormap(<span class="string">'jet'</span>); colorbar;
+0066         set(gca,<span class="string">'XTick'</span>,1:numel(gamma_range))
+0067         set(gca,<span class="string">'XTickLabel'</span>,sprintf(<span class="string">'%.2d|'</span>,gamma_range))
+0068         xlabel(<span class="string">'gamma'</span>);
+0069         set(gca,<span class="string">'YTick'</span>,numel(cost_range))
+0070         set(gca,<span class="string">'YTickLabel'</span>,sprintf(<span class="string">'%.2d|'</span>,cost_range))
+0071         ylabel(<span class="string">'cost'</span>);
+0072 
+0073     <span class="comment">% ---------------------------------------------------------------------</span>
+0074     <span class="comment">%% Linear SVM</span>
+0075     <span class="comment">% ---------------------------------------------------------------------</span>
+0076     <span class="keyword">elseif</span> strcmp(kernel_type, <span class="string">'linear'</span>)
+0077         crossval_matrix = zeros(1,numel(cost_range));
+0078         best_cv = 0;
+0079         best_c = 0;
+0080         k = 3;  <span class="comment">% number of folds</span>
+0081 
+0082         <span class="keyword">for</span> c_ind=1:numel(cost_range)
+0083             c = cost_range(c_ind);
+0084             svm_params = <span class="keyword">...</span>
+0085                 [<span class="string">'-q -v '</span>, num2str(k),<span class="string">' -t '</span>,num2str(0) ,<span class="string">' -c '</span>, num2str(c)];
+0086             cv = svmtrain(labels, train_matrix, svm_params);
+0087             crossval_matrix(1,c_ind) = cv;
+0088             fprintf(<span class="string">'&lt;cost=%d&gt; \n\n'</span>,c);
+0089             
+0090             <span class="comment">% writing crossvalidation log file</span>
+0091             log_file = fopen([model_save_path,<span class="string">'.cv'</span>],<span class="string">'a'</span>);
+0092             fprintf(log_file, sprintf(<span class="string">'&lt;cost=%f&gt;: acc=%f \n\n'</span>,c, cv));
+0093             fclose(log_file);
+0094             
+0095             <span class="comment">% updating best cv value</span>
+0096             <span class="keyword">if</span> (cv &gt;= best_cv),
+0097                 best_cv = cv; 
+0098                 best_c = c;
+0099             <span class="keyword">end</span>
+0100         <span class="keyword">end</span>
+0101 
+0102         crossval_elapsed = toc(crossval_start);
+0103         fprintf(<span class="string">'SVM crosvalidation done in: %f seconds.\n'</span>,crossval_elapsed);
+0104 
+0105         <span class="comment">% final training params</span>
+0106         fprintf(<span class="string">'Best crossval reached: %d, with cost=%d\n\n'</span>, best_cv, best_c);
+0107         svm_params = [<span class="string">'-q -t '</span>,num2str(0) ,<span class="string">' -c '</span>, num2str(best_c),<span class="string">' -b 1'</span>];
+0108 
+0109         <span class="comment">% Plot the cross validation grid</span>
+0110         figure;
+0111         plot(crossval_matrix');
+0112         set(gca,<span class="string">'XTickLabel'</span>,sprintf(<span class="string">'%.2d|'</span>,cost_range))
+0113         xlabel(<span class="string">'cost'</span>);
+0114         ylabel(<span class="string">'accuracy'</span>);
+0115     <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

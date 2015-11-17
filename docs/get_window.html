@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of get_window</title>
+  <meta name="keywords" content="get_window">
+  <meta name="description" content="GET_WINDOW Gets a WxH window from the input image (I) with method">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; get_window.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>get_window
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>GET_WINDOW Gets a WxH window from the input image (I) with method</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function image_window = get_window(I,W,H, method) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> GET_WINDOW Gets a WxH window from the input image (I) with method 
+           'method'. Possible method are 'center','random' or coordiantes.
+
+
+ INPUT: 
+       I: input image
+       W,H: width and height of the desired window
+       method: {center, random, coordinates}
+               center picks a centered window from the image
+               random picks any random window where possible
+               coordinates specify the upper left corner coords.
+
+ OUTPUT: the sampled window
+
+$ Author: Jose Marcos Rodriguez $ 
+$ Date: N/D $ 
+$ Revision : 1.00 $ 
+% FILENAME  : get_window.m</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="convert2gray.html" class="code" title="function convert2gray()">convert2gray</a>	CONVERT2GRAY converts to gray all JPG, PNG or PPM images found in</li><li><a href="get_feature_matrix.html" class="code" title="function [labels, train_matrix] = get_feature_matrix(positive_images, negative_images)">get_feature_matrix</a>	GET_FEATURE_MATRIX computes the descriptor matrix for all input images</li><li><a href="get_negative_windows.html" class="code" title="function get_negative_windows(num_random_windows, num_images)">get_negative_windows</a>	GET_NEGATIVE_WINDOWS retrieves random windows from the original negative</li><li><a href="plot_DETcurve.html" class="code" title="function plot_DETcurve(models, model_names,pos_path, neg_path)">plot_DETcurve</a>	PLOT_DETCURVE function to compute de DET plot given a set of models</li><li><a href="plot_reject_curves.html" class="code" title="function plot_reject_curves(model,paths)">plot_reject_curves</a>	PLOT_REJECT_CURVES Tests a (lib)SVM classifier from the specified images</li><li><a href="test_svm.html" class="code" title="function statistics = test_svm(model,paths)">test_svm</a>	TEST_SVM Tests a (lib)SVM classifier from the specified images paths</li><li><a href="test_svm_PCA.html" class="code" title="function statistics = test_svm_PCA(model,Ureduce, paths)">test_svm_PCA</a>	TEST_SVM_PCA Tests a (lib)SVM classifier from the specified images paths</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function image_window = get_window(I,W,H, method)</a>
+0002 <span class="comment">% GET_WINDOW Gets a WxH window from the input image (I) with method</span>
+0003 <span class="comment">%           'method'. Possible method are 'center','random' or coordiantes.</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% INPUT:</span>
+0007 <span class="comment">%       I: input image</span>
+0008 <span class="comment">%       W,H: width and height of the desired window</span>
+0009 <span class="comment">%       method: {center, random, coordinates}</span>
+0010 <span class="comment">%               center picks a centered window from the image</span>
+0011 <span class="comment">%               random picks any random window where possible</span>
+0012 <span class="comment">%               coordinates specify the upper left corner coords.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% OUTPUT: the sampled window</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0017 <span class="comment">%$ Date: N/D $</span>
+0018 <span class="comment">%$ Revision : 1.00 $</span>
+0019 <span class="comment">%% FILENAME  : get_window.m</span>
+0020 
+0021 <span class="keyword">if</span> ischar(method)
+0022     
+0023     <span class="keyword">if</span> strcmp(method,<span class="string">'random'</span>)
+0024         [height,width,~] = size(I);
+0025         max_x_pixel = width-W+1;
+0026         min_y_pixel = height-H+1;
+0027         rand_h = mod(round(rand()*100),min_y_pixel)+1;
+0028         rand_w = mod(round(rand()*100),max_x_pixel)+1;
+0029         image_window = I(rand_h:rand_h+H-1,rand_w:rand_w+W-1,:);
+0030 
+0031     <span class="keyword">elseif</span> strcmp(method,<span class="string">'center'</span>)
+0032         [height,width,~] = size(I);
+0033         x_margin = width-W+1;
+0034         y_margin = height-H+1;
+0035         x0 = max(1,floor(x_margin/2));
+0036         y0 = max(1,floor(y_margin/2));
+0037         image_window = I(y0:y0+H-1,x0:x0+W-1,:);
+0038         
+0039     <span class="keyword">else</span>
+0040         cprintf(<span class="string">'Errors'</span>,<span class="string">'GET_WINDOW: windows selction method not recognized\n'</span>)
+0041         image_window = [];
+0042     <span class="keyword">end</span>
+0043     
+0044 <span class="keyword">elseif</span> isnumeric(method)
+0045         x0 = method(1);
+0046         y0 = method(2);
+0047         [height,width,~] = size(I);
+0048         <span class="keyword">if</span> y0+H-1 &lt;= height &amp;&amp; x0+W-1 &lt;= width
+0049             image_window = I(y0:y0+H-1,x0:x0+W-1,:);
+0050         <span class="keyword">else</span>
+0051             cprintf(<span class="string">'Errors'</span>,<span class="string">'Window size o\n'</span>)
+0052             image_window = [];
+0053         <span class="keyword">end</span>
+0054 <span class="keyword">else</span>
+0055     cprintf(<span class="string">'Errors'</span>,<span class="string">'Method not recognized\n'</span>)
+0056     image_window = [];
+0057 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

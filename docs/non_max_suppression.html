@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of non_max_suppression</title>
+  <meta name="keywords" content="non_max_suppression">
+  <meta name="description" content="NON_MAX_SUPRESION applies non maximum suppression to get the">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; non_max_suppression.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>non_max_suppression
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>NON_MAX_SUPRESION applies non maximum suppression to get the</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function max_indices = non_max_suppression(coords, probs, bb_sizes) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> NON_MAX_SUPRESION applies non maximum suppression to get the 
+ most confident detections over a proximity area.
+ Input: window coordiantes, window classification probabilities and 
+        window size referenced to the level 0 pyramid layer.
+ Output: the most confident window indices</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="static_detector.html" class="code" title="function static_detector(model)">static_detector</a>	STATIC_DETECTOR given a folder containing PNG or JPG images applies</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function d = distance(coords1, coords2)</a></li><li><a href="#_sub2" class="code">function overlapping_area = overlap(coords1, coords2, bb_size2)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function max_indices = non_max_suppression(coords, probs, bb_sizes)</a>
+0002 <span class="comment">% NON_MAX_SUPRESION applies non maximum suppression to get the</span>
+0003 <span class="comment">% most confident detections over a proximity area.</span>
+0004 <span class="comment">% Input: window coordiantes, window classification probabilities and</span>
+0005 <span class="comment">%        window size referenced to the level 0 pyramid layer.</span>
+0006 <span class="comment">% Output: the most confident window indices</span>
+0007 
+0008 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0009 <span class="comment">%$ Date: 23-Nov-2013 12:37:16 $</span>
+0010 <span class="comment">%$ Revision : 1.00 $</span>
+0011 <span class="comment">%% FILENAME  : non_max_supresion.m</span>
+0012 
+0013 MIN_DIST = 1024;
+0014 <span class="comment">% MAX_AREA = 128*64/3;</span>
+0015 
+0016 max_indices = [];
+0017 m = size(coords,1);
+0018 indices = 1:m;
+0019 
+0020 <span class="comment">% while we have nearby windows not suppressed...</span>
+0021 <span class="keyword">while</span> size(indices, 2) &gt; 1
+0022 
+0023     nearby_window_indices = indices(1);
+0024     
+0025     <span class="comment">% for all remaining indices...</span>
+0026     <span class="keyword">for</span> i=2:size(indices,2)
+0027         
+0028         <span class="comment">% we search the nearby windows</span>
+0029         d = <a href="#_sub1" class="code" title="subfunction d = distance(coords1, coords2)">distance</a>(coords(indices(1),:), coords(indices(i),:));
+0030         <span class="keyword">if</span> d &lt; MIN_DIST
+0031             nearby_window_indices = [nearby_window_indices, indices(i)];
+0032         <span class="keyword">end</span>
+0033 
+0034 <span class="comment">%         area = overlap(coords(indices(1),:), coords(indices(i),:), bb_sizes(indices(i),:));</span>
+0035 <span class="comment">%         if area &gt; MAX_AREA</span>
+0036 <span class="comment">%             nearby_window_indices = [nearby_window_indices, indices(i)];</span>
+0037 <span class="comment">%         end</span>
+0038     <span class="keyword">end</span>
+0039     
+0040     <span class="comment">% from the nearby windows we only keep the most confident one</span>
+0041     nearby_probs = probs(nearby_window_indices,1);
+0042     max_indx = nearby_window_indices(max(nearby_probs) == nearby_probs);
+0043     max_indices = [max_indices, max_indx];
+0044     
+0045     <span class="comment">% removing from indices all the treated ones</span>
+0046     <span class="keyword">for</span> k=1:size(nearby_window_indices,2)
+0047        indices = indices(indices ~= nearby_window_indices(k));
+0048     <span class="keyword">end</span>
+0049     
+0050 <span class="keyword">end</span>
+0051 <span class="keyword">end</span>
+0052 
+0053 
+0054 
+0055 
+0056 <a name="_sub1" href="#_subfunctions" class="code">function d = distance(coords1, coords2)</a>
+0057     d = sum((coords1-coords2).^2);
+0058 <span class="keyword">end</span>
+0059 
+0060 <a name="_sub2" href="#_subfunctions" class="code">function overlapping_area = overlap(coords1, coords2, bb_size2)</a>
+0061     delta = coords1-coords2;
+0062     delta_x = delta(1);
+0063     delta_y = delta(2);
+0064     h = bb_size2(1);
+0065     w = bb_size2(2);
+0066     overlapping_area = w*h - abs(delta_x*w) - abs(delta_y*h) + abs(delta_x*delta_y);
+0067 <span class="keyword">end</span>
+0068 
+0069 
+0070</pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

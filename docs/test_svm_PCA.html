@@ -1,0 +1,399 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_svm_PCA</title>
+  <meta name="keywords" content="test_svm_PCA">
+  <meta name="description" content="TEST_SVM_PCA Tests a (lib)SVM classifier from the specified images paths">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; test_svm_PCA.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>test_svm_PCA
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>TEST_SVM_PCA Tests a (lib)SVM classifier from the specified images paths</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function statistics = test_svm_PCA(model,Ureduce, paths) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> TEST_SVM_PCA Tests a (lib)SVM classifier from the specified images paths
+               reducing first each hog matrix to a dimensionality reduced
+               version.
+
+ INPUT:
+ model: SVMmodel to use
+ threshold: positive confidence threshold 
+ paths: positive / negative images_path to test
+ //
+ windows, descriptor and test parameter configuration is read from their
+ corresponding paramteter files. If not found a window prompts for them.
+
+ OUTPUT:
+ statistics: ok, ko, false_pos, false_neg, true_pos, true_neg
+             fppw and miss_rate metrics
+
+$ Author: Jose Marcos Rodriguez $    
+$ Date: 2013/11/09 $    
+$ Revision: 1.05 $</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="compute_HOG.html" class="code" title="function H = compute_HOG(I, cell_size, block_size,n_bins)">compute_HOG</a>	COMPUTE_HOG Computes the HOG descriptor of the given image computed</li><li><a href="get_files.html" class="code" title="function [positive_images, negative_images] = get_files(pos_elems, neg_elems, paths)">get_files</a>	GET_FILES retrieves complete paths to every JPG, PNG or PPM image file.</li><li><a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>	GET_PARAMS retrieve params saved in a .mat file</li><li><a href="get_pyramid_dimensions.html" class="code" title="function [num_levels, num_windows, windows_per_level] = get_pyramid_dimensions(I)">get_pyramid_dimensions</a>	GET_PYRAMID_DIMENSIONS function to compute the pyramid dimensions</li><li><a href="get_pyramid_hogs.html" class="code" title="function [hogs,windows,wxl,coordinates] = get_pyramid_hogs(I, desc_size, scale, stride)">get_pyramid_hogs</a>	GET_PYRAMID_HOGS function computes de HOG descriptor for all the</li><li><a href="get_window.html" class="code" title="function image_window = get_window(I,W,H, method)">get_window</a>	GET_WINDOW Gets a WxH window from the input image (I) with method</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function get_test_params()</a></li><li><a href="#_sub2" class="code">function count = get_negative_windows_count(negative_images)</a></li><li><a href="#_sub3" class="code">function [level, num_window] = get_window_indices(wxl, w_linear_index)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function statistics = test_svm_PCA(model,Ureduce, paths)</a>
+0002 <span class="comment">% TEST_SVM_PCA Tests a (lib)SVM classifier from the specified images paths</span>
+0003 <span class="comment">%               reducing first each hog matrix to a dimensionality reduced</span>
+0004 <span class="comment">%               version.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% INPUT:</span>
+0007 <span class="comment">% model: SVMmodel to use</span>
+0008 <span class="comment">% threshold: positive confidence threshold</span>
+0009 <span class="comment">% paths: positive / negative images_path to test</span>
+0010 <span class="comment">% //</span>
+0011 <span class="comment">% windows, descriptor and test parameter configuration is read from their</span>
+0012 <span class="comment">% corresponding paramteter files. If not found a window prompts for them.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% OUTPUT:</span>
+0015 <span class="comment">% statistics: ok, ko, false_pos, false_neg, true_pos, true_neg</span>
+0016 <span class="comment">%             fppw and miss_rate metrics</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0019 <span class="comment">%$ Date: 2013/11/09 $</span>
+0020 <span class="comment">%$ Revision: 1.05 $</span>
+0021 
+0022     <span class="comment">%% svm testing parameters</span>
+0023     <a href="#_sub1" class="code" title="subfunction get_test_params()">get_test_params</a>();
+0024 
+0025     <span class="comment">% path stuff</span>
+0026     <span class="keyword">if</span> nargin &lt; 3
+0027         positive_images_path = uigetdir(<span class="string">'images'</span>,<span class="string">'Select positive image folder'</span>);
+0028         negative_images_path = uigetdir(<span class="string">'images'</span>,<span class="string">'Select negative image folder'</span>);
+0029         <span class="keyword">if</span> safe
+0030           images_path = uigetdir(<span class="string">'images'</span>,<span class="string">'Select base image path'</span>);
+0031         <span class="keyword">end</span>
+0032 
+0033         <span class="keyword">if</span> isa(positive_images_path,<span class="string">'double'</span>)  || <span class="keyword">...</span>
+0034            isa(negative_images_path,<span class="string">'double'</span>)
+0035             cprintf(<span class="string">'Errors'</span>,<span class="string">'Invalid paths...\nexiting...\n\n'</span>)
+0036             <span class="keyword">return</span> 
+0037         <span class="keyword">end</span>
+0038         
+0039     <span class="keyword">else</span>
+0040         positive_images_path = paths{1};
+0041         negative_images_path = paths{2};
+0042         <span class="keyword">if</span> safe
+0043           images_path = paths{3};
+0044         <span class="keyword">end</span>
+0045     <span class="keyword">end</span>
+0046   
+0047     
+0048     <span class="comment">%% getting images to test from the specified folders</span>
+0049     paths = {positive_images_path,negative_images_path};
+0050     [positive_images, negative_images] = <a href="get_files.html" class="code" title="function [positive_images, negative_images] = get_files(pos_elems, neg_elems, paths)">get_files</a>(pos_instances,neg_instances, paths);
+0051 
+0052     
+0053     
+0054     
+0055     <span class="comment">% ====================================================================</span>
+0056     <span class="comment">%% Reading all POSITIVE images &amp; computing the descriptor</span>
+0057     <span class="comment">% (64x128 images)</span>
+0058     <span class="comment">% ====================================================================</span>
+0059 
+0060     <span class="comment">%% Computing HOG descriptor for all images (in chunks)</span>
+0061     pos_start_time = tic;
+0062     false_negatives = 0;
+0063     true_positives = 0;
+0064 
+0065     i = 0;
+0066     <span class="keyword">while</span> i &lt; numel(positive_images)
+0067        
+0068        <span class="comment">%% window obtainment</span>
+0069        this_chunk = min(pos_chunk_size,numel(positive_images)-i);
+0070        windows = uint8(zeros(height,width,depth,this_chunk));
+0071        hogs = zeros(this_chunk, descriptor_size);
+0072        labels = ones(size(hogs,1),1);
+0073        <span class="keyword">for</span> l=1:this_chunk
+0074             I = imread(positive_images(i+1).name);
+0075             windows(:,:,:,l) = <a href="get_window.html" class="code" title="function image_window = get_window(I,W,H, method)">get_window</a>(I,width,height, <span class="string">'center'</span>);
+0076             hogs(l,:) = <a href="compute_HOG.html" class="code" title="function H = compute_HOG(I, cell_size, block_size,n_bins)">compute_HOG</a>(windows(:,:,:,l),cell_size,block_size,n_bins);
+0077             i = i+1;
+0078        <span class="keyword">end</span>
+0079        
+0080        <span class="comment">% just for fixing GUI freezing due to unic thread MatLab issue</span>
+0081        drawnow; 
+0082 
+0083        <span class="comment">%% prediction</span>
+0084        hogs = hogs*Ureduce;
+0085        [predict_labels, ~, probs] = <span class="keyword">...</span>
+0086             svmpredict(labels, hogs, model, <span class="string">'-b 1'</span>);
+0087         
+0088         <span class="comment">%% counting and copying</span>
+0089         <span class="keyword">for</span> l=1:size(predict_labels)
+0090             predict_label = predict_labels(l);
+0091             
+0092             <span class="keyword">if</span> probs(l,1) &gt;= 0.1
+0093                 ok = ok + 1;
+0094                 true_positives = true_positives + 1;
+0095             <span class="keyword">else</span>
+0096                 ko = ko + 1;
+0097                 false_negatives = false_negatives + 1;
+0098 
+0099                 <span class="comment">% saving hard image for further retrain</span>
+0100                 <span class="keyword">if</span> safe
+0101                     [~, name, ext] = fileparts(positive_images(i).name);
+0102                     saving_path = [images_path,<span class="string">'/hard_examples/false_neg/'</span>,<span class="keyword">...</span>
+0103                                    name,<span class="keyword">...</span>
+0104                                    <span class="string">'_n_wind_'</span>,num2str(l), ext];
+0105                                
+0106                    <span class="comment">% writting image</span>
+0107                    imwrite(windows(:,:,:,l), saving_path); 
+0108                <span class="keyword">end</span>
+0109             <span class="keyword">end</span>  
+0110         <span class="keyword">end</span>
+0111     <span class="keyword">end</span>
+0112     
+0113     <span class="comment">% hog extraction elapsed time</span>
+0114     pos_elapsed_time = toc(pos_start_time);
+0115     fprintf(<span class="string">'Elapsed time to classify positive images: %f seconds.\n'</span>,pos_elapsed_time);
+0116     
+0117 
+0118     
+0119     
+0120     
+0121     <span class="comment">% ====================================================================</span>
+0122     <span class="comment">%% Reading all NEGATIVE images &amp; computing the descriptor</span>
+0123     <span class="comment">% Exhaustive search for hard examples</span>
+0124     <span class="comment">% (space-scaled 64x128 windows)</span>
+0125     <span class="comment">% ====================================================================</span>
+0126     
+0127     num_neg_images = size(negative_images,1);
+0128     <span class="keyword">if</span> strcmp(neg_method, <span class="string">'pyramid'</span>)
+0129         num_neg_windows = <span class="keyword">...</span>
+0130             <a href="#_sub2" class="code" title="subfunction count = get_negative_windows_count(negative_images)">get_negative_windows_count</a>(negative_images);
+0131     <span class="keyword">elseif</span> strcmp(neg_method, <span class="string">'windows'</span>)
+0132         num_neg_windows = num_neg_images*neg_chunk_size;
+0133     <span class="keyword">end</span>
+0134     fprintf(<span class="string">'testing with %d negative images and %d negative windows\n'</span>, num_neg_images,num_neg_windows);
+0135     
+0136 
+0137     <span class="comment">%% Computing HOG descriptor for all images (in chunks)</span>
+0138     neg_start_time = tic;
+0139     false_positives = 0;
+0140     true_negatives = 0;
+0141 
+0142     i = 0;
+0143     <span class="keyword">while</span> i &lt; numel(negative_images)
+0144        
+0145        <span class="comment">%% window obtaintion</span>
+0146        <span class="comment">% All pyramid HOGS</span>
+0147        <span class="keyword">if</span> strcmp(neg_method, <span class="string">'pyramid'</span>)
+0148             I = imread(negative_images(i+1).name);
+0149             
+0150             <span class="comment">%% temporal</span>
+0151             [h,w,~] = size(I);
+0152             <span class="keyword">if</span> max(h,w) &gt;= 160
+0153                ratio = max(96/w,160/h);
+0154                I = imresize(I,ratio); 
+0155             <span class="keyword">end</span>
+0156             <span class="comment">%% fin temporal</span>
+0157             [hogs, windows, wxl] = <a href="get_pyramid_hogs.html" class="code" title="function [hogs,windows,wxl,coordinates] = get_pyramid_hogs(I, desc_size, scale, stride)">get_pyramid_hogs</a>(I, descriptor_size, scale, stride);
+0158             labels = ones(size(hogs,1),1).*(-1);
+0159             i = i+1;
+0160            
+0161        <span class="comment">% random window HOG</span>
+0162        <span class="keyword">elseif</span> strcmp(neg_method,<span class="string">'windows'</span>)
+0163            this_chunk = min(neg_chunk_size, numel(negative_images)-i);
+0164            windows = uint8(zeros(height,width,depth,this_chunk));
+0165            hogs = zeros(this_chunk, descriptor_size);
+0166            labels = ones(size(hogs,1),1).*(-1);
+0167            
+0168            <span class="keyword">for</span> l=1:this_chunk
+0169                 I = imread(negative_images(i+1).name);
+0170                 windows(:,:,:,l) = <a href="get_window.html" class="code" title="function image_window = get_window(I,W,H, method)">get_window</a>(I,width,height, <span class="string">'center'</span>);
+0171                 hogs(l,:) = <a href="compute_HOG.html" class="code" title="function H = compute_HOG(I, cell_size, block_size,n_bins)">compute_HOG</a>(windows(:,:,:,l),cell_size,block_size,n_bins);
+0172                 i = i+1;
+0173            <span class="keyword">end</span>
+0174        <span class="keyword">end</span>
+0175        
+0176        <span class="comment">% just for fixing GUI freezing due to unic thread MatLab issue</span>
+0177        drawnow; 
+0178        
+0179        <span class="comment">%% prediction</span>
+0180        hogs = hogs*Ureduce;
+0181        [predict_labels, ~, probs] = <span class="keyword">...</span>
+0182             svmpredict(labels, hogs, model, <span class="string">'-b 1'</span>);
+0183 
+0184        <span class="comment">%% updating statistics</span>
+0185        <span class="keyword">for</span> l=1:size(predict_labels)
+0186            predict_label = predict_labels(l);
+0187            
+0188            <span class="keyword">if</span> probs(l,1) &lt; 0.1
+0189                ok = ok + 1;
+0190                true_negatives = true_negatives + 1;
+0191            <span class="keyword">else</span>
+0192                ko = ko + 1;
+0193                false_positives = false_positives + 1;
+0194 
+0195                <span class="keyword">if</span> safe
+0196                    <span class="comment">% saving hard image for further retrain</span>
+0197                    [~, name, ext] = fileparts(negative_images(i).name);
+0198 
+0199                    <span class="keyword">if</span> strcmp(neg_method, <span class="string">'pyramid'</span>)
+0200                        [level, num_image] = <a href="#_sub3" class="code" title="subfunction [level, num_window] = get_window_indices(wxl, w_linear_index)">get_window_indices</a>(wxl, l);
+0201                        saving_path = [images_path,<span class="string">'/hard_examples/false_pos/'</span>,<span class="keyword">...</span>
+0202                                       name,<span class="keyword">...</span>
+0203                                       <span class="string">'_l'</span>,num2str(level),<span class="keyword">...</span>
+0204                                       <span class="string">'_w'</span>,num2str(num_image),ext];
+0205                    <span class="keyword">else</span>
+0206                         saving_path = [images_path,<span class="string">'/hard_examples/false_pos/'</span>,<span class="keyword">...</span>
+0207                                        name,<span class="keyword">...</span>
+0208                                        <span class="string">'_n_wind_'</span>,num2str(l), ext];
+0209                    <span class="keyword">end</span>
+0210                   <span class="comment">% writting image</span>
+0211                   imwrite(windows(:,:,:,l), saving_path); 
+0212                <span class="keyword">end</span>
+0213            <span class="keyword">end</span>  
+0214        <span class="keyword">end</span>
+0215     <span class="keyword">end</span>
+0216     
+0217     <span class="comment">% hog extraction elapsed time</span>
+0218     neg_elapsed_time = toc(neg_start_time);
+0219     fprintf(<span class="string">'Elapsed time to classify negative images: %f seconds.\n'</span>,neg_elapsed_time);
+0220     
+0221     
+0222 
+0223     <span class="comment">%% Printing gloabl results</span>
+0224     precision = true_positives/(true_positives+false_positives);
+0225     recall = true_positives/(true_positives+false_negatives);
+0226     
+0227     fprintf(<span class="string">'oks: %d \n'</span>,ok)
+0228     fprintf(<span class="string">'kos: %d \n'</span>,ko)
+0229     fprintf(<span class="string">'false positives: %d \n'</span>,false_positives)
+0230     fprintf(<span class="string">'false negatives: %d \n'</span>,false_negatives)
+0231     fprintf(<span class="string">'true positives: %d \n'</span>,true_positives)
+0232     fprintf(<span class="string">'true negatives: %d \n'</span>,true_negatives)
+0233     fprintf(<span class="string">'mis rate: %d \n'</span>,false_negatives / (true_positives + false_negatives))
+0234     fprintf(<span class="string">'fppw: %d \n'</span>,false_positives / (ok + ko))
+0235     fprintf(<span class="string">'Precision: %d \n'</span>,precision)
+0236     fprintf(<span class="string">'Recall: %d \n'</span>,recall)
+0237     fprintf(<span class="string">'F score: %d \n'</span>,2*((precision*recall)/(precision+recall)))
+0238     
+0239     <span class="comment">% preparing values to return</span>
+0240     statistics = containers.Map;
+0241     statistics(<span class="string">'oks'</span>) = ok;
+0242     statistics(<span class="string">'kos'</span>) = ok;
+0243     statistics(<span class="string">'fp'</span>) = false_positives;
+0244     statistics(<span class="string">'tp'</span>) = true_positives;
+0245     statistics(<span class="string">'fn'</span>) = false_negatives;
+0246     statistics(<span class="string">'tn'</span>) = true_negatives;
+0247     statistics(<span class="string">'miss_rate'</span>) = false_negatives / (true_positives + false_negatives);
+0248     statistics(<span class="string">'fppw'</span>) = false_positives / (ok + ko);
+0249     statistics(<span class="string">'precision'</span>) = precision;
+0250     statistics(<span class="string">'recall'</span>) = recall;
+0251     statistics(<span class="string">'fscore'</span>) = 2*((precision*recall)/(precision+recall));
+0252     
+0253     
+0254     
+0255     
+0256     
+0257     
+0258     
+0259     <span class="comment">% ---------------------------------------------------------------------</span>
+0260     <span class="comment">%% Aux function to obtain the test parameters</span>
+0261     <span class="comment">% ---------------------------------------------------------------------</span>
+0262     <a name="_sub1" href="#_subfunctions" class="code">function get_test_params()</a>
+0263         test_params = <a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>(<span class="string">'test_svm_params'</span>);
+0264         pos_chunk_size = test_params.pos_chunk_size;
+0265         neg_chunk_size = test_params.neg_chunk_size;
+0266         scale = test_params.scale;
+0267         stride = test_params.stride;
+0268         threshold = test_params.threshold;
+0269         neg_method = test_params.neg_window_method;
+0270         safe = test_params.safe;
+0271         neg_instances = test_params.neg_instances;
+0272         pos_instances = test_params.pos_instances;
+0273 
+0274         w_params = <a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>(<span class="string">'window_params'</span>);
+0275         depth = w_params.color_depth;
+0276         width = w_params.width; 
+0277         height = w_params.height;
+0278         
+0279         desc_params = <a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>(<span class="string">'desc_params'</span>);
+0280         cell_size = desc_params.cell_size;
+0281         block_size = desc_params.block_size;
+0282         n_bins = desc_params.n_bins;
+0283         desp = 1;
+0284         n_v_cells = floor(height/cell_size);
+0285         n_h_cells = floor(width/cell_size);
+0286         hist_size = block_size*block_size*n_bins;
+0287         descriptor_size = hist_size*(n_v_cells-block_size+desp)*(n_h_cells-block_size+desp);
+0288         
+0289 
+0290         ok = 0;
+0291         ko = 0; 
+0292     <span class="keyword">end</span>
+0293     
+0294 <span class="keyword">end</span>
+0295      
+0296 
+0297 
+0298 <span class="comment">%% Aux function to know how many windows we'll have...</span>
+0299 <a name="_sub2" href="#_subfunctions" class="code">function count = get_negative_windows_count(negative_images)</a>
+0300      <span class="comment">% computing number of levels in the pyramid</span>
+0301      count = 0;
+0302      <span class="keyword">for</span> i=1:numel(negative_images)
+0303         I = imread(negative_images(i).name);
+0304         <span class="comment">%% temporal</span>
+0305         [h,w,~] = size(I);
+0306         <span class="keyword">if</span> max(h,w) &gt;= 160
+0307            ratio = max(96/w,160/h);
+0308            I = imresize(I,ratio); 
+0309         <span class="keyword">end</span>
+0310         <span class="comment">%% fin temporal</span>
+0311         [~, windows] = <a href="get_pyramid_dimensions.html" class="code" title="function [num_levels, num_windows, windows_per_level] = get_pyramid_dimensions(I)">get_pyramid_dimensions</a>(I);
+0312         count = count + windows;
+0313      <span class="keyword">end</span>
+0314 <span class="keyword">end</span>
+0315 
+0316 
+0317 
+0318 
+0319 <span class="comment">%% Aux function to know how the windows indices...</span>
+0320 <a name="_sub3" href="#_subfunctions" class="code">function [level, num_window] = get_window_indices(wxl, w_linear_index)</a>
+0321     accum_windows = 0;
+0322     <span class="keyword">for</span> i=1:size(wxl,2)
+0323         accum_windows = accum_windows + wxl(i);
+0324         <span class="keyword">if</span> w_linear_index &lt;= accum_windows
+0325            level = i;
+0326            num_window = accum_windows - w_linear_index;
+0327            <span class="keyword">break</span> 
+0328         <span class="keyword">end</span>
+0329     <span class="keyword">end</span>
+0330 
+0331 <span class="keyword">end</span>
+0332</pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

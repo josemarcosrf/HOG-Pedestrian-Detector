@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of get_pyramid_dimensions</title>
+  <meta name="keywords" content="get_pyramid_dimensions">
+  <meta name="description" content="GET_PYRAMID_DIMENSIONS function to compute the pyramid dimensions">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; get_pyramid_dimensions.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>get_pyramid_dimensions
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>GET_PYRAMID_DIMENSIONS function to compute the pyramid dimensions</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [num_levels, num_windows, windows_per_level] = get_pyramid_dimensions(I) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> GET_PYRAMID_DIMENSIONS function to compute the pyramid dimensions
+
+ INPUT: 
+       I: input image
+ OUTPUT:
+       num_levels: pyramid levels
+       num_windows: total number of windows over whole pyramid
+       windows_per_level: number of windows in each level
+
+$ Author: Jose Marcos Rodriguez $ 
+$ Date: N/D $ 
+$ Revision : 1.01 $ 
+% FILENAME  : get_pyramid_dimensions.m</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>	GET_PARAMS retrieve params saved in a .mat file</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="get_pyramid_hogs.html" class="code" title="function [hogs,windows,wxl,coordinates] = get_pyramid_hogs(I, desc_size, scale, stride)">get_pyramid_hogs</a>	GET_PYRAMID_HOGS function computes de HOG descriptor for all the</li><li><a href="get_scale_space_pyramid_images.html" class="code" title="function [pyramid, coordinates] = get_scale_space_pyramid_images(I,scale,stride, show)">get_scale_space_pyramid_images</a>	GET_SCALE_SPACE_PYRAMID_IMAGES retrieves every window image in a</li><li><a href="test_svm.html" class="code" title="function statistics = test_svm(model,paths)">test_svm</a>	TEST_SVM Tests a (lib)SVM classifier from the specified images paths</li><li><a href="test_svm_PCA.html" class="code" title="function statistics = test_svm_PCA(model,Ureduce, paths)">test_svm_PCA</a>	TEST_SVM_PCA Tests a (lib)SVM classifier from the specified images paths</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [num_levels, num_windows, windows_per_level] = get_pyramid_dimensions(I)</a>
+0002 <span class="comment">% GET_PYRAMID_DIMENSIONS function to compute the pyramid dimensions</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% INPUT:</span>
+0005 <span class="comment">%       I: input image</span>
+0006 <span class="comment">% OUTPUT:</span>
+0007 <span class="comment">%       num_levels: pyramid levels</span>
+0008 <span class="comment">%       num_windows: total number of windows over whole pyramid</span>
+0009 <span class="comment">%       windows_per_level: number of windows in each level</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0012 <span class="comment">%$ Date: N/D $</span>
+0013 <span class="comment">%$ Revision : 1.01 $</span>
+0014 <span class="comment">%% FILENAME  : get_pyramid_dimensions.m</span>
+0015 
+0016     w_params = <a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>(<span class="string">'window_params'</span>);
+0017     window_width = w_params.width;
+0018     window_height = w_params.height;
+0019     
+0020     py_params = <a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>(<span class="string">'pyramid_params'</span>);
+0021     scale = py_params.scale;
+0022     stride = py_params.stride;
+0023 
+0024     <span class="comment">% computing number of levels in the pyramid</span>
+0025     [height,width, ~] = size(I);
+0026     l_w = (log(width)/log(scale)) - (log(window_width)/log(scale));
+0027     l_h = (log(height)/log(scale)) - (log(window_height)/log(scale));
+0028     num_levels = floor(min(l_w,l_h))+1;
+0029     <span class="comment">%         fprintf('number of levels:%d\n', levels+1);</span>
+0030 
+0031     levels = 0:num_levels-1;
+0032 
+0033     <span class="comment">% image dimensions</span>
+0034     im_w = ceil(width./scale.^(levels));
+0035     im_h = ceil(height./scale.^(levels));
+0036 
+0037     <span class="comment">% num windows computed as: 1 window + n*stride</span>
+0038     num_V_windows = floor((im_h-window_height)/stride)+1;
+0039     num_H_windows = floor((im_w-window_width)/stride)+1;
+0040 
+0041     <span class="comment">% Counting windows through levels</span>
+0042     windows_per_level = (num_V_windows .* num_H_windows);
+0043     num_windows = sum(windows_per_level);  
+0044 
+0045 <span class="keyword">end</span>
+0046 
+0047             
+0048</pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

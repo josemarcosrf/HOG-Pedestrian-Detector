@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of compute_gradient</title>
+  <meta name="keywords" content="compute_gradient">
+  <meta name="description" content="COMPUTE_GRADIENT Function to compute the image gradient in polar form">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; compute_gradient.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>compute_gradient
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>COMPUTE_GRADIENT Function to compute the image gradient in polar form</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [angles,magnitudes] = compute_gradient(I) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> COMPUTE_GRADIENT Function to compute the image gradient in polar form 
+                  between 0º and 180º.
+
+ INPUT:
+       I: input Image
+
+ OUTPUT:
+       angles: angles of the gradient vectors for each pixel
+       magnitudes: module of the gradient vectors for each pixel 
+ 
+$ Author: Jose Marcos Rodriguez $    
+$ Date: N/D $    
+$ Revision: 1.03 $</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="compute_gradient.html" class="code" title="function [angles,magnitudes] = compute_gradient(I)">compute_gradient</a>	COMPUTE_GRADIENT Function to compute the image gradient in polar form</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="compute_HOG.html" class="code" title="function H = compute_HOG(I, cell_size, block_size,n_bins)">compute_HOG</a>	COMPUTE_HOG Computes the HOG descriptor of the given image computed</li><li><a href="compute_gradient.html" class="code" title="function [angles,magnitudes] = compute_gradient(I)">compute_gradient</a>	COMPUTE_GRADIENT Function to compute the image gradient in polar form</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [angles,magnitudes] = compute_gradient(I)</a>
+0002 <span class="comment">% COMPUTE_GRADIENT Function to compute the image gradient in polar form</span>
+0003 <span class="comment">%                  between 0º and 180º.</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% INPUT:</span>
+0006 <span class="comment">%       I: input Image</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% OUTPUT:</span>
+0009 <span class="comment">%       angles: angles of the gradient vectors for each pixel</span>
+0010 <span class="comment">%       magnitudes: module of the gradient vectors for each pixel</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0013 <span class="comment">%$ Date: N/D $</span>
+0014 <span class="comment">%$ Revision: 1.03 $</span>
+0015 
+0016 
+0017 <span class="comment">%% Image reading and adjust to enhace contrast</span>
+0018 [cols,rows,color_depth] = size(I);
+0019 
+0020 <span class="comment">%% Derivatives masks</span>
+0021 dx = [-1,0,1];
+0022 dy = -dx';
+0023 
+0024 <span class="comment">%% computing the derivative of the extended image and cutting the extended</span>
+0025 <span class="comment">%% borders</span>
+0026 <span class="keyword">if</span> color_depth == 1
+0027     
+0028     <span class="comment">% Adding a 1 pixel border to the image to avoid boundary conditions</span>
+0029     I = imadjust(I);
+0030     extended_img = ones(cols+2,rows+2,color_depth);
+0031     extended_img(2:1+cols,2:1+rows,:) = I(:,:,:);
+0032     
+0033     <span class="comment">% Computing the gradient</span>
+0034     Gx = filter2(dx,double(extended_img));
+0035     Gx = Gx(1:cols,1:rows);
+0036     Gy = filter2(dy,double(extended_img));
+0037     Gy = Gy(1:cols,1:rows);
+0038     
+0039     <span class="comment">% Tranforming the gradient vectors to polar form</span>
+0040     angles = atan2(Gy,Gx);
+0041     magnitudes = sqrt(Gy.^2 + Gx.^2);
+0042     
+0043 <span class="keyword">elseif</span> color_depth &gt; 1
+0044     
+0045     <span class="comment">% Computing gradient for every chanel</span>
+0046     [red_angs, red_mags] = <a href="compute_gradient.html" class="code" title="function [angles,magnitudes] = compute_gradient(I)">compute_gradient</a>(I(:,:,1));
+0047     [green_angs, blue_mags] = <a href="compute_gradient.html" class="code" title="function [angles,magnitudes] = compute_gradient(I)">compute_gradient</a>(I(:,:,2));
+0048     [blue_angs, green_mags] = <a href="compute_gradient.html" class="code" title="function [angles,magnitudes] = compute_gradient(I)">compute_gradient</a>(I(:,:,3));
+0049 
+0050     <span class="comment">% magnitudes as the max magnitud over the three chanels</span>
+0051     magnitudes = max(green_mags,max(red_mags,blue_mags));
+0052 
+0053     <span class="comment">% angle of the chanel with maximum magnitude</span>
+0054     angles = zeros(size(magnitudes));
+0055     angles(magnitudes == red_mags) = red_angs(magnitudes == red_mags);
+0056     angles(magnitudes == blue_mags) = green_angs(magnitudes == blue_mags);
+0057     angles(magnitudes == green_mags) = blue_angs(magnitudes == green_mags);
+0058 <span class="keyword">end</span>
+0059 
+0060 <span class="comment">%% Making angles be between [0,180] degrees</span>
+0061 <span class="comment">% As atan2 gives angles in [-pi,pi] we filter negative values for</span>
+0062 <span class="comment">% having all angles in [0,pi] (1st &amp; 2nd quadrant)</span>
+0063 angles(angles(:)&lt;0) = angles(angles(:)&lt;0)+pi;
+0064 
+0065</pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

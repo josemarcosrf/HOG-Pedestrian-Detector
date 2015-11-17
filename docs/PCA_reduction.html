@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PCA_reduction</title>
+  <meta name="keywords" content="PCA_reduction">
+  <meta name="description" content="PCA_REDUCTION applies PCA (Principal Component Analysis) to get the">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; PCA_reduction.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PCA_reduction
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>PCA_REDUCTION applies PCA (Principal Component Analysis) to get the</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [reduced_features, Ureduce] = PCA_reduction(features, min_variance) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> PCA_REDUCTION applies PCA (Principal Component Analysis) to get the 
+ most significant dimension of the data and reduces its dimension in
+ such a way that 'min_variance' is retained in the final reduced matrix.
+ Input: feature matrix, desired variance to retain.
+ Output: reduced features, EigenVectors of the features matrix</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="train_svm_PCA.html" class="code" title="function [new_model,Ureduce] = train_svm_PCA(model_name, paths)">train_svm_PCA</a>	TRAIN_SVM_PCA Train an SVM classifier with the specified images.</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [reduced_features, Ureduce] = PCA_reduction(features, min_variance)</a>
+0002 <span class="comment">% PCA_REDUCTION applies PCA (Principal Component Analysis) to get the</span>
+0003 <span class="comment">% most significant dimension of the data and reduces its dimension in</span>
+0004 <span class="comment">% such a way that 'min_variance' is retained in the final reduced matrix.</span>
+0005 <span class="comment">% Input: feature matrix, desired variance to retain.</span>
+0006 <span class="comment">% Output: reduced features, EigenVectors of the features matrix</span>
+0007 
+0008 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0009 <span class="comment">%$ Date: 09-Mar-2014 17:37:14 $</span>
+0010 <span class="comment">%$ Revision : 1.00 $</span>
+0011 <span class="comment">%% FILENAME  : PCA_reduction.m</span>
+0012 
+0013 
+0014 k = size(features, 2);      <span class="comment">% initial features dimensions</span>
+0015 m = size(features, 1);      <span class="comment">% number of instances</span>
+0016 
+0017 <span class="comment">% Compute variance matrix</span>
+0018 cov_matrix = 1/m .* features' * features;
+0019 [U,S,~] = svd(cov_matrix);
+0020 diagS = diag(S);
+0021 
+0022 <span class="comment">% Find minimum k that satisfies variance preservation requirements</span>
+0023 <span class="keyword">for</span> i=1:size(diagS,1)
+0024     variance = sum(diagS(1:i)) / sum(diagS);
+0025     <span class="keyword">if</span> variance &gt; min_variance
+0026         k = i;
+0027         fprintf(<span class="string">'variance: %d, componenets: %d\n'</span>, variance, k)
+0028         <span class="keyword">break</span>
+0029     <span class="keyword">end</span>
+0030 <span class="keyword">end</span>
+0031 
+0032 <span class="comment">% Reducing features dimension</span>
+0033 Ureduce = U(:,1:k);
+0034 reduced_features = features*Ureduce;
+0035 whos(<span class="string">'reduced_features'</span>)
+0036 
+0037 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

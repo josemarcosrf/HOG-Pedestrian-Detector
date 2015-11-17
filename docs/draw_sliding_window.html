@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of draw_sliding_window</title>
+  <meta name="keywords" content="draw_sliding_window">
+  <meta name="description" content="DRAW_SLIDING_WINDOW function that given an image and a model scans">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; draw_sliding_window.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>draw_sliding_window
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>DRAW_SLIDING_WINDOW function that given an image and a model scans</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function draw_sliding_window(I, model) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> DRAW_SLIDING_WINDOW function that given an image and a model scans 
+ exhaustively over a scale-space pyramid the image for pedestrians
+ drawing the sliding detection window and the confidence probability.
+
+ INPUT:
+       model: model to test
+       I: image to scan
+   
+
+$ Author: Jose Marcos Rodriguez $ 
+$ Date: - $ 
+$ Revision : 1.00 $ 
+% FILENAME  : draw_sliding_window.m</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="get_pyramid_hogs.html" class="code" title="function [hogs,windows,wxl,coordinates] = get_pyramid_hogs(I, desc_size, scale, stride)">get_pyramid_hogs</a>	GET_PYRAMID_HOGS function computes de HOG descriptor for all the</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="sliding_detector.html" class="code" title="function sliding_detector(model)">sliding_detector</a>	SLIDING_DETECTOR given a folder containing PNG or JPG images applies</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function [level, num_window] = get_window_indices(wxl, w_linear_index)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function draw_sliding_window(I, model)</a>
+0002 <span class="comment">% DRAW_SLIDING_WINDOW function that given an image and a model scans</span>
+0003 <span class="comment">% exhaustively over a scale-space pyramid the image for pedestrians</span>
+0004 <span class="comment">% drawing the sliding detection window and the confidence probability.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% INPUT:</span>
+0007 <span class="comment">%       model: model to test</span>
+0008 <span class="comment">%       I: image to scan</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0012 <span class="comment">%$ Date: - $</span>
+0013 <span class="comment">%$ Revision : 1.00 $</span>
+0014 <span class="comment">%% FILENAME  : draw_sliding_window.m</span>
+0015 
+0016 <span class="comment">% Testing if param file exists in the params directory</span>
+0017 <span class="keyword">if</span> exist([<span class="string">'params'</span>,filesep,<span class="string">'detect_and_draw.params'</span>],<span class="string">'file'</span>)
+0018     test_params = load([<span class="string">'params'</span>,filesep,<span class="string">'detect_and_draw.params'</span>],<span class="string">'-ascii'</span>);
+0019 
+0020 <span class="comment">% Testing if param file exists in the current directory</span>
+0021 <span class="keyword">elseif</span> exist(<span class="string">'detect_and_draw.params'</span>,<span class="string">'file'</span>)
+0022     test_params = load(<span class="string">'detect_and_draw.params'</span>,<span class="string">'-ascii'</span>);
+0023 
+0024 <span class="comment">% Dialog to select param file</span>
+0025 <span class="keyword">else</span>
+0026     [param_file,PathName,~] = uigetfile(<span class="string">'*.params'</span>,<span class="string">'Select parameter file'</span>);
+0027     <span class="keyword">if</span> ~isa(param_file,<span class="string">'double'</span>)
+0028         test_params = load([PathName,filesep,param_file],<span class="string">'-ascii'</span>);
+0029     <span class="keyword">else</span>
+0030         cprintf(<span class="string">'Errors'</span>,<span class="string">'Missing param file...\nexiting...\n\n'</span>);
+0031         <span class="keyword">return</span>
+0032     <span class="keyword">end</span>
+0033 <span class="keyword">end</span>
+0034   
+0035 <span class="comment">%% wiring up the param vars</span>
+0036 th = test_params(1);
+0037 scale = test_params(2);
+0038 hog_size = test_params(3); 
+0039 stride = test_params(4);
+0040 
+0041 <span class="comment">% fprintf('Threshold=%f\n',th)</span>
+0042 <span class="comment">% fprintf('Scale=%f\n',scale)</span>
+0043 <span class="comment">% fprintf('Descriptor size=%f\n',hog_size)</span>
+0044 <span class="comment">% fprintf('Window stride=%f\n',stride)</span>
+0045 
+0046 <span class="comment">%% color definitions</span>
+0047 red = uint8([255,0,0]);
+0048 green = uint8([0,255,0]);
+0049 
+0050 <span class="comment">%% shape inserters</span>
+0051 ok_shapeInserter = <span class="keyword">...</span>
+0052     vision.ShapeInserter(<span class="string">'BorderColor'</span>,<span class="string">'Custom'</span>,<span class="string">'CustomBorderColor'</span>,green);
+0053 ko_shapeInserter = <span class="keyword">...</span>
+0054     vision.ShapeInserter(<span class="string">'BorderColor'</span>,<span class="string">'Custom'</span>,<span class="string">'CustomBorderColor'</span>,red);
+0055 
+0056 ti = tic;
+0057 fprintf(<span class="string">'\nbegining the pyramid hog extraction...\n'</span>)
+0058 [hogs, ~, wxl, coordinates] = <a href="get_pyramid_hogs.html" class="code" title="function [hogs,windows,wxl,coordinates] = get_pyramid_hogs(I, desc_size, scale, stride)">get_pyramid_hogs</a>(I, hog_size, scale, stride);
+0059 tf = toc(ti);
+0060 fprintf(<span class="string">'time to extract %d hogs: %d\n'</span>, size(hogs,1), tf);
+0061 
+0062 <span class="comment">%% refer coordinates to the original image... (Level0)</span>
+0063 <span class="comment">% for each window in every level...</span>
+0064 ind = 1;
+0065 <span class="keyword">for</span> l=1:size(wxl,2)
+0066     ws= wxl(l);
+0067     <span class="keyword">for</span> w=1:ws
+0068         <span class="comment">% compute original coordinates in Level0 image</span>
+0069         factor = (scale^(l-1));
+0070         coordinates(1,ind) = floor(coordinates(1,ind) * factor);
+0071         coordinates(2,ind) = floor(coordinates(2,ind) * factor);
+0072         ind = ind + 1;
+0073     <span class="keyword">end</span>
+0074 <span class="keyword">end</span>
+0075 
+0076 <span class="comment">%% SVM prediction for all windows...</span>
+0077 [predict_labels, ~, probs] = <span class="keyword">...</span>
+0078     svmpredict(zeros(size(hogs,1),1), hogs, model, <span class="string">'-b 1'</span>);
+0079    
+0080 <span class="comment">% draw in the original image the detecction window</span>
+0081 <span class="comment">% red: not detected</span>
+0082 <span class="comment">% green: detected</span>
+0083 <span class="keyword">for</span> i=1:numel(predict_labels)
+0084     [level, ~] = <a href="#_sub1" class="code" title="subfunction [level, num_window] = get_window_indices(wxl, w_linear_index)">get_window_indices</a>(wxl, i);
+0085 <span class="comment">%     figure('name', sprintf('level %d detection', level));</span>
+0086     
+0087     x = coordinates(1,i);
+0088     y = coordinates(2,i);
+0089     factor = (scale^(level-1));
+0090     rectangle = int32([x,y,64*factor,128*factor]);
+0091         
+0092     <span class="keyword">if</span> predict_labels(i) == 1 &amp;&amp; probs(i) &gt; th
+0093         J = step(ok_shapeInserter, I, rectangle);
+0094         J = insertText(J, [x,y], probs(i), <span class="string">'FontSize'</span>,9,<span class="string">'BoxColor'</span>, <span class="string">'green'</span>);
+0095         imshow(J);
+0096         figure(gcf); 
+0097         pause(0.5);
+0098     <span class="keyword">else</span>
+0099         J = step(ko_shapeInserter, I, rectangle);
+0100         imshow(J);
+0101         figure(gcf); 
+0102     <span class="keyword">end</span>
+0103 <span class="keyword">end</span>
+0104 <span class="comment">% closing all figures...</span>
+0105 <span class="comment">% close all</span>
+0106 <span class="keyword">end</span>
+0107 
+0108 
+0109 
+0110 
+0111 <span class="comment">%% Aux func. to get the level and window number given a linear index</span>
+0112 <a name="_sub1" href="#_subfunctions" class="code">function [level, num_window] = get_window_indices(wxl, w_linear_index)</a>
+0113     accum_windows = 0;
+0114     <span class="keyword">for</span> i=1:size(wxl,2)
+0115         accum_windows = accum_windows + wxl(i);
+0116         <span class="keyword">if</span> w_linear_index &lt;= accum_windows
+0117            level = i;
+0118            num_window = accum_windows - w_linear_index;
+0119            <span class="keyword">break</span> 
+0120         <span class="keyword">end</span>
+0121     <span class="keyword">end</span>
+0122 
+0123 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

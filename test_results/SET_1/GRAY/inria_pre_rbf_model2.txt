@@ -1,0 +1,8 @@
+oks: 551 
+kos: 10 
+false positives: 3 
+false negatives: 7 
+true positives: 369 
+true negatives: 182 
+mis rate: 1.861702e-02 
+fppw: 5.347594e-03 

@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plot_tsne_map</title>
+  <meta name="keywords" content="plot_tsne_map">
+  <meta name="description" content="PLOT_TSNE_MAP plots a 2D map of the multi-dimensional spatial">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; plot_tsne_map.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>plot_tsne_map
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>PLOT_TSNE_MAP plots a 2D map of the multi-dimensional spatial</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function mappedX = plot_tsne_map(nPos, nNeg, paths) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> PLOT_TSNE_MAP plots a 2D map of the multi-dimensional spatial 
+               distribution of the features.
+  
+ INPUT:
+       nPos, nNeg: number of positive / negative images
+       paths: image paths as a cell array
+ OUTPUT:
+       reduced dimensional mapped data to print as a scatter plot.
+
+$ Author: Jose Marcos Rodriguez $ 
+$ Date: 02-Dec-2013 17:57:42 $ 
+$ Revision : 1.00 $ 
+% FILENAME  : plot_tsne_map.m</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="get_feature_matrix.html" class="code" title="function [labels, train_matrix] = get_feature_matrix(positive_images, negative_images)">get_feature_matrix</a>	GET_FEATURE_MATRIX computes the descriptor matrix for all input images</li><li><a href="get_files.html" class="code" title="function [positive_images, negative_images] = get_files(pos_elems, neg_elems, paths)">get_files</a>	GET_FILES retrieves complete paths to every JPG, PNG or PPM image file.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function mappedX = plot_tsne_map(nPos, nNeg, paths)</a>
+0002 <span class="comment">% PLOT_TSNE_MAP plots a 2D map of the multi-dimensional spatial</span>
+0003 <span class="comment">%               distribution of the features.</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% INPUT:</span>
+0006 <span class="comment">%       nPos, nNeg: number of positive / negative images</span>
+0007 <span class="comment">%       paths: image paths as a cell array</span>
+0008 <span class="comment">% OUTPUT:</span>
+0009 <span class="comment">%       reduced dimensional mapped data to print as a scatter plot.</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0012 <span class="comment">%$ Date: 02-Dec-2013 17:57:42 $</span>
+0013 <span class="comment">%$ Revision : 1.00 $</span>
+0014 <span class="comment">%% FILENAME  : plot_tsne_map.m</span>
+0015 
+0016 <span class="comment">% Getting image directories</span>
+0017 <span class="keyword">if</span> nargin &lt;= 2
+0018     pos_path = uigetdir(<span class="string">'.\images'</span>,<span class="string">'Select positive test image path'</span>);
+0019     <span class="keyword">if</span> isa(pos_path,<span class="string">'double'</span>)
+0020         cprintf(<span class="string">'Errors'</span>,<span class="string">'Invalid path...\nexiting...\n\n'</span>)
+0021         <span class="keyword">return</span> 
+0022     <span class="keyword">end</span>
+0023 
+0024     neg_path = uigetdir(<span class="string">'.\images'</span>,<span class="string">'Select negative test image path'</span>);
+0025     <span class="keyword">if</span> isa(neg_path,<span class="string">'double'</span>)
+0026         cprintf(<span class="string">'Errors'</span>,<span class="string">'Invalid path...\nexiting...\n\n'</span>)
+0027         <span class="keyword">return</span> 
+0028     <span class="keyword">end</span>
+0029     
+0030 <span class="keyword">else</span>
+0031    pos_path = paths{1};
+0032    neg_path = paths{2};
+0033 <span class="keyword">end</span>
+0034 
+0035 <span class="comment">% reading images and computing HOGs</span>
+0036 [pos_ims,neg_ims] = <a href="get_files.html" class="code" title="function [positive_images, negative_images] = get_files(pos_elems, neg_elems, paths)">get_files</a>(nPos,nNeg,{pos_path, neg_path});
+0037 [labels, hogs] = <a href="get_feature_matrix.html" class="code" title="function [labels, train_matrix] = get_feature_matrix(positive_images, negative_images)">get_feature_matrix</a>(pos_ims, neg_ims);
+0038 
+0039 
+0040 <span class="comment">%% Computing the t-sne map</span>
+0041 <span class="comment">% Params</span>
+0042 n_dims = 2;
+0043 init_dims = 30;
+0044 perplexity = 30;
+0045 
+0046 <span class="comment">% Running t-sne</span>
+0047 mappedX = tsne(hogs, [], n_dims, init_dims, perplexity);
+0048 whos(<span class="string">'mappedX'</span>)
+0049 
+0050 <span class="comment">% Plot results</span>
+0051 figure();
+0052 gscatter(mappedX(:,1), mappedX(:,2), labels,<span class="string">'br'</span>,<span class="string">'xo'</span>);</pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

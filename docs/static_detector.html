@@ -1,0 +1,224 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of static_detector</title>
+  <meta name="keywords" content="static_detector">
+  <meta name="description" content="STATIC_DETECTOR given a folder containing PNG or JPG images applies">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; static_detector.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>static_detector
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>STATIC_DETECTOR given a folder containing PNG or JPG images applies</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function static_detector(model) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> STATIC_DETECTOR given a folder containing PNG or JPG images applies
+                 the specified libSVM model to scan through every image 
+                 for pedestrians in a sliding window basis.
+  
+ All the parameters are hard coded to guaratee independence from
+ external files, assuming once this function in run the whole set of 
+ parameters are well known and no further experimentation is needed.
+
+$ Author: Jose Marcos Rodriguez $ 
+$ Date: 05-Dec-2013 23:09:05 $ 
+$ Revision : 1.00 $ 
+% FILENAME  : static_detector.m</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="get_pyramid_hogs.html" class="code" title="function [hogs,windows,wxl,coordinates] = get_pyramid_hogs(I, desc_size, scale, stride)">get_pyramid_hogs</a>	GET_PYRAMID_HOGS function computes de HOG descriptor for all the</li><li><a href="non_max_suppression.html" class="code" title="function max_indices = non_max_suppression(coords, probs, bb_sizes)">non_max_suppression</a>	NON_MAX_SUPRESION applies non maximum suppression to get the</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function [bb_size, new_cords] = compute_level0_coordinates(wxl, coordinates, inds, scale)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function static_detector(model)</a>
+0002 <span class="comment">% STATIC_DETECTOR given a folder containing PNG or JPG images applies</span>
+0003 <span class="comment">%                 the specified libSVM model to scan through every image</span>
+0004 <span class="comment">%                 for pedestrians in a sliding window basis.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% All the parameters are hard coded to guaratee independence from</span>
+0007 <span class="comment">% external files, assuming once this function in run the whole set of</span>
+0008 <span class="comment">% parameters are well known and no further experimentation is needed.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0011 <span class="comment">%$ Date: 05-Dec-2013 23:09:05 $</span>
+0012 <span class="comment">%$ Revision : 1.00 $</span>
+0013 <span class="comment">%% FILENAME  : static_detector.m</span>
+0014 
+0015     <span class="comment">%% VARS</span>
+0016     hog_size = 3780;
+0017     scale = 1.2;
+0018     stride = 8;
+0019     show_all = false;
+0020     draw_all = false;
+0021     
+0022     <span class="comment">%% color definitions</span>
+0023     green = uint8([0,255,0]);
+0024     yellow = uint8([255,255,0]);
+0025     
+0026     <span class="comment">%% shape inserters</span>
+0027     ok_shapeInserter = <span class="keyword">...</span>
+0028         vision.ShapeInserter(<span class="string">'BorderColor'</span>,<span class="string">'Custom'</span>,<span class="string">'CustomBorderColor'</span>,green);
+0029     other_shapeInserter = <span class="keyword">...</span>
+0030         vision.ShapeInserter(<span class="string">'BorderColor'</span>,<span class="string">'Custom'</span>,<span class="string">'CustomBorderColor'</span>,yellow);
+0031 
+0032     images_path = uigetdir(<span class="string">'.\..'</span>,<span class="string">'Select image folder'</span>);
+0033     
+0034     <span class="comment">%% image reading</span>
+0035     jpgs = rdir(strcat(images_path,filesep,<span class="string">'*.jpg'</span>));
+0036     pngs = rdir(strcat(images_path,filesep,<span class="string">'*.png'</span>));
+0037     images = [jpgs, pngs];
+0038     num_images = size(images,1);
+0039 
+0040     <span class="keyword">for</span> i=1:num_images
+0041         
+0042         fprintf(<span class="string">'-------------------------------------------\n'</span>)
+0043         disp(images(i).name);
+0044         I = imread(images(i).name);
+0045 
+0046         <span class="comment">%% Reescale</span>
+0047         [h,w,~] = size(I);
+0048         rscale = min(w/96, h/160);
+0049         I = imresize(I, 1.2/rscale);
+0050 
+0051         <span class="comment">%% HOG extraction for all image windows</span>
+0052         ti = tic;
+0053         fprintf(<span class="string">'\nbegining the pyramid hog extraction...\n'</span>)
+0054         [hogs, windows, wxl, coordinates] = <a href="get_pyramid_hogs.html" class="code" title="function [hogs,windows,wxl,coordinates] = get_pyramid_hogs(I, desc_size, scale, stride)">get_pyramid_hogs</a>(I, hog_size, scale, stride);
+0055         tf = toc(ti);
+0056         fprintf(<span class="string">'time to extract %d hogs: %d\n'</span>, size(hogs,1), tf);
+0057 
+0058         <span class="comment">%% SVM prediction for all windows...</span>
+0059         [predict_labels, ~, probs] = <span class="keyword">...</span>
+0060             svmpredict(zeros(size(hogs,1),1), hogs, model, <span class="string">'-b 1'</span>);
+0061 
+0062         <span class="comment">%% filtering only positives windows instances</span>
+0063         <span class="comment">% index of positives windows</span>
+0064         range = 1:max(size(predict_labels));
+0065         pos_indxs = range(predict_labels == 1);
+0066 <span class="comment">%         pos_indxs = range(probs(1) &gt;= 0.995);</span>
+0067 
+0068         <span class="comment">% positive match information</span>
+0069         coordinates = coordinates';
+0070         coordinates = coordinates(pos_indxs,:);
+0071         probs = probs(pos_indxs,:);
+0072 
+0073 
+0074         <span class="comment">%% Computing level 0 coordinates for drawing</span>
+0075         [bb_size, l0_coordinates] = <a href="#_sub1" class="code" title="subfunction [bb_size, new_cords] = compute_level0_coordinates(wxl, coordinates, inds, scale)">compute_level0_coordinates</a>(wxl, coordinates, pos_indxs, scale);
+0076         
+0077         <span class="comment">%% Showing all positive windows in separate figures</span>
+0078         <span class="keyword">if</span> show_all
+0079             windows = windows(:,:,:,pos_indxs);
+0080 
+0081             <span class="keyword">for</span> w=1:size(pos_indxs,2)
+0082                figure(<span class="string">'name'</span>,sprintf(<span class="string">'x=%d, y=%d'</span>, l0_coordinates(w,1),l0_coordinates(w,2))); 
+0083     <span class="comment">%            figure('name',sprintf('x=%d, y=%d', bb_size(w,1),bb_size(w,2)));</span>
+0084                ii = insertText(windows(:,:,:,w), [1,1], probs(w), <span class="string">'FontSize'</span>,9,<span class="string">'BoxColor'</span>, <span class="string">'green'</span>);
+0085                imshow(ii) 
+0086             <span class="keyword">end</span>
+0087         <span class="keyword">end</span>
+0088 
+0089         <span class="comment">%% Drawing detections over the original image</span>
+0090         draw = I;
+0091         shape_inserter = other_shapeInserter;
+0092         <span class="keyword">if</span> ~draw_all
+0093             
+0094            shape_inserter = ok_shapeInserter;
+0095             
+0096            <span class="comment">%% non-max-suppression!</span>
+0097            max_indxs = <a href="non_max_suppression.html" class="code" title="function max_indices = non_max_suppression(coords, probs, bb_sizes)">non_max_suppression</a>(l0_coordinates, probs, bb_size); 
+0098            pos_indxs = pos_indxs(max_indxs);
+0099            l0_coordinates = l0_coordinates(max_indxs,:);
+0100            bb_size = bb_size(max_indxs, :);
+0101            probs = probs(max_indxs,:);
+0102         <span class="keyword">end</span>
+0103             
+0104         draw = I;
+0105         <span class="keyword">for</span> w=1:size(pos_indxs,2)
+0106             <span class="comment">%% Drawing the rectangle on the original image</span>
+0107             x = l0_coordinates(w,1);
+0108             y = l0_coordinates(w,2);
+0109 
+0110             <span class="comment">% Rectangle conf</span>
+0111             bb_height = bb_size(w,1);
+0112             bb_width = bb_size(w,2);
+0113             rectangle = int32([x,y,bb_width,bb_height]);
+0114 
+0115             draw = step(shape_inserter, draw, rectangle);
+0116             draw = insertText(draw, [x,y+bb_height], probs(w), <span class="string">'FontSize'</span>,9,<span class="string">'BoxColor'</span>, <span class="string">'green'</span>);
+0117 
+0118         <span class="keyword">end</span>
+0119         <span class="comment">% Showing image with all the detection boxes</span>
+0120         imshow(draw);
+0121         figure(gcf);
+0122         pause;
+0123             
+0124     <span class="keyword">end</span>
+0125 <span class="keyword">end</span>
+0126 
+0127 
+0128 
+0129 <span class="comment">%% Aux function to compute the windows coordiantes at level 0 pyramid image</span>
+0130 <a name="_sub1" href="#_subfunctions" class="code">function [bb_size, new_cords] = compute_level0_coordinates(wxl, coordinates, inds, scale)</a>
+0131 
+0132     <span class="comment">% Consts</span>
+0133     bb_width = 64;
+0134     bb_height = 128;
+0135     
+0136     <span class="comment">% Vars</span>
+0137     new_cords = zeros(size(inds,2),2);
+0138     bb_size = zeros(size(inds,2),2);
+0139     
+0140     <span class="comment">% for each positive window index...</span>
+0141     <span class="keyword">for</span> i=1:size(inds,2)
+0142         
+0143         <span class="comment">% linear index of the window</span>
+0144         ind = inds(i);
+0145         
+0146         <span class="comment">% find the positive window original level</span>
+0147         level = 0;
+0148 
+0149         <span class="keyword">while</span> ind &gt; sum(wxl(1:level))
+0150             level = level + 1;
+0151         <span class="keyword">end</span>
+0152 
+0153 <span class="comment">%         fprintf('Match found at level %d\n', level);</span>
+0154         
+0155         <span class="comment">% compute original coordinates in Level0 image</span>
+0156         factor = (scale^(level-1));
+0157         new_cords(i,1) = floor(coordinates(i,1) * factor);
+0158         new_cords(i,2) = floor(coordinates(i,2) * factor);
+0159         
+0160         <span class="comment">% Bounding Box resizing?</span>
+0161         bb_size(i,1) = ceil(bb_height*factor);
+0162         bb_size(i,2) = ceil(bb_width*factor);
+0163     <span class="keyword">end</span>
+0164 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

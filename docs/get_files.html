@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of get_files</title>
+  <meta name="keywords" content="get_files">
+  <meta name="description" content="GET_FILES retrieves complete paths to every JPG, PNG or PPM image file.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; get_files.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>get_files
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>GET_FILES retrieves complete paths to every JPG, PNG or PPM image file.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [positive_images, negative_images] = get_files(pos_elems, neg_elems, paths) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> GET_FILES retrieves complete paths to every JPG, PNG or PPM image file. 
+  
+ INPUT:
+       pos/neg_elems: pos/negs max elems to retrieve
+       paths: paths from where to retrieve image paths
+
+ OUTPUT:
+       positive / negative_images: paths to the images.
+
+$ Author: Jose Marcos Rodriguez $ 
+$ Date: 25-Dec-2013 23:41:52 $ 
+$ Revision : 1.00 $ 
+% FILENAME  : get_files.m</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="plot_DETcurve.html" class="code" title="function plot_DETcurve(models, model_names,pos_path, neg_path)">plot_DETcurve</a>	PLOT_DETCURVE function to compute de DET plot given a set of models</li><li><a href="plot_ROCcurve.html" class="code" title="function plot_ROCcurve()">plot_ROCcurve</a>	PLOT_ROCCURVE asks for a svm model file, pos & neg images</li><li><a href="plot_reject_curves.html" class="code" title="function plot_reject_curves(model,paths)">plot_reject_curves</a>	PLOT_REJECT_CURVES Tests a (lib)SVM classifier from the specified images</li><li><a href="plot_tsne_map.html" class="code" title="function mappedX = plot_tsne_map(nPos, nNeg, paths)">plot_tsne_map</a>	PLOT_TSNE_MAP plots a 2D map of the multi-dimensional spatial</li><li><a href="test_svm.html" class="code" title="function statistics = test_svm(model,paths)">test_svm</a>	TEST_SVM Tests a (lib)SVM classifier from the specified images paths</li><li><a href="test_svm_PCA.html" class="code" title="function statistics = test_svm_PCA(model,Ureduce, paths)">test_svm_PCA</a>	TEST_SVM_PCA Tests a (lib)SVM classifier from the specified images paths</li><li><a href="train_svm.html" class="code" title="function new_model = train_svm(model_name, paths)">train_svm</a>	TRAIN_SVM Train an SVM classifier with the specified images.</li><li><a href="train_svm_PCA.html" class="code" title="function [new_model,Ureduce] = train_svm_PCA(model_name, paths)">train_svm_PCA</a>	TRAIN_SVM_PCA Train an SVM classifier with the specified images.</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [positive_images, negative_images] = get_files(pos_elems, neg_elems, paths)</a>
+0002 <span class="comment">% GET_FILES retrieves complete paths to every JPG, PNG or PPM image file.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% INPUT:</span>
+0005 <span class="comment">%       pos/neg_elems: pos/negs max elems to retrieve</span>
+0006 <span class="comment">%       paths: paths from where to retrieve image paths</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% OUTPUT:</span>
+0009 <span class="comment">%       positive / negative_images: paths to the images.</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0012 <span class="comment">%$ Date: 25-Dec-2013 23:41:52 $</span>
+0013 <span class="comment">%$ Revision : 1.00 $</span>
+0014 <span class="comment">%% FILENAME  : get_files.m</span>
+0015 
+0016 IMG_WILDCARDS = {<span class="string">'*.jpg'</span>,<span class="string">'*.png'</span>,<span class="string">'*.ppm'</span>};
+0017 
+0018     <span class="comment">%% path stuff</span>
+0019     <span class="keyword">if</span> nargin &lt; 3
+0020         positive_images_path = uigetdir(<span class="string">'.images'</span>,<span class="string">'Select positive image folder'</span>);
+0021         negative_images_path = uigetdir(<span class="string">'.images'</span>,<span class="string">'Select negative image folder'</span>);
+0022         
+0023         <span class="keyword">if</span> isa(positive_images_path,<span class="string">'double'</span>)  || <span class="keyword">...</span>
+0024            isa(negative_images_path,<span class="string">'double'</span>)
+0025             cprintf(<span class="string">'Errors'</span>,<span class="string">'Invalid paths...\nexiting...\n\n'</span>)
+0026             <span class="keyword">return</span> 
+0027         <span class="keyword">end</span>
+0028         
+0029     <span class="keyword">else</span>
+0030         positive_images_path = paths{1};
+0031         negative_images_path = paths{2};
+0032     <span class="keyword">end</span>
+0033     
+0034 
+0035     <span class="comment">%% getting POSITIVE images and count</span>
+0036     positive_images = [];
+0037     <span class="keyword">for</span> i=1:numel(IMG_WILDCARDS)
+0038         wildcard = strcat(positive_images_path,filesep,IMG_WILDCARDS{i});
+0039         positive_images = [positive_images; rdir(wildcard)];
+0040     <span class="keyword">end</span>
+0041     fprintf(<span class="string">'current positive path: %s \n'</span>, positive_images_path);
+0042 
+0043 
+0044     <span class="comment">% getting a random sample of the total number of images</span>
+0045     <span class="keyword">if</span> pos_elems &lt; 0
+0046         pos_elems = numel(positive_images);
+0047     <span class="keyword">end</span>
+0048     idx = randperm(numel(positive_images));
+0049     positive_images = positive_images(idx(1:pos_elems));
+0050     num_pos_images = size(positive_images,1);
+0051     fprintf(<span class="string">'getting %d positive images HOGs\n'</span>, num_pos_images);
+0052     
+0053     
+0054     <span class="comment">%% getting NEGATIVE images path and count</span>
+0055     negative_images = [];
+0056     <span class="keyword">for</span> i=1:numel(IMG_WILDCARDS)
+0057         wildcard = strcat(negative_images_path,filesep,IMG_WILDCARDS{i});
+0058         negative_images = [negative_images; rdir(wildcard)];
+0059     <span class="keyword">end</span>
+0060     fprintf(<span class="string">'current negative path: %s \n'</span>, negative_images_path);
+0061 
+0062     
+0063     <span class="comment">% getting a random sample of the total number of images</span>
+0064     <span class="keyword">if</span> neg_elems &lt; 0
+0065         neg_elems = numel(negative_images);
+0066     <span class="keyword">end</span>
+0067     idx = randperm(numel(negative_images));
+0068     negative_images = negative_images(idx(1:neg_elems));
+0069     num_neg_images = size(negative_images,1);
+0070     fprintf(<span class="string">'getting %d negative images HOGs\n'</span>, num_neg_images);</pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

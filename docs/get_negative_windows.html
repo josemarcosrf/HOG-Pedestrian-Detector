@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of get_negative_windows</title>
+  <meta name="keywords" content="get_negative_windows">
+  <meta name="description" content="GET_NEGATIVE_WINDOWS retrieves random windows from the original negative">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; get_negative_windows.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>get_negative_windows
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>GET_NEGATIVE_WINDOWS retrieves random windows from the original negative</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function get_negative_windows(num_random_windows, num_images) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> GET_NEGATIVE_WINDOWS retrieves random windows from the original negative
+                      image set and saves the window in the specified
+                      folder when prompted.
+ INPUT:
+       num_random_windows: random window samples per image
+       num_images: number of images from where to sample windows.
+
+$ Author: Jose Marcos Rodriguez $ 
+$ Date: N/D $ 
+$ Revision : 1.00 $ 
+% FILENAME  : get_negative_windows.m</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="get_window.html" class="code" title="function image_window = get_window(I,W,H, method)">get_window</a>	GET_WINDOW Gets a WxH window from the input image (I) with method</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001     
+0002 <a name="_sub0" href="#_subfunctions" class="code">function get_negative_windows(num_random_windows, num_images)</a>
+0003 <span class="comment">% GET_NEGATIVE_WINDOWS retrieves random windows from the original negative</span>
+0004 <span class="comment">%                      image set and saves the window in the specified</span>
+0005 <span class="comment">%                      folder when prompted.</span>
+0006 <span class="comment">% INPUT:</span>
+0007 <span class="comment">%       num_random_windows: random window samples per image</span>
+0008 <span class="comment">%       num_images: number of images from where to sample windows.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0011 <span class="comment">%$ Date: N/D $</span>
+0012 <span class="comment">%$ Revision : 1.00 $</span>
+0013 <span class="comment">%% FILENAME  : get_negative_windows.m</span>
+0014     
+0015     <span class="comment">% Paths</span>
+0016     negative_images_path = uigetdir(<span class="string">'.\images'</span>,<span class="string">'Select original images path'</span>);
+0017     windows_dst_path = uigetdir(<span class="string">'.\images'</span>,<span class="string">'Select destination path'</span>);
+0018 
+0019     <span class="keyword">if</span> isa(negative_images_path,<span class="string">'double'</span>) || isa(windows_dst_path,<span class="string">'double'</span>)
+0020         cprintf(<span class="string">'Errors'</span>,<span class="string">'Invalid paths...\nexiting...\n\n'</span>)
+0021         <span class="keyword">return</span> 
+0022     <span class="keyword">end</span>
+0023    
+0024    negative_images = dir(negative_images_path);
+0025    negative_images = negative_images(3:end);
+0026    
+0027    <span class="keyword">if</span> num_images &lt; 1
+0028        fprintf(<span class="string">'\ngetting all available images\n'</span>)
+0029        num_images = numel(negative_images);
+0030    <span class="keyword">elseif</span> num_images &gt; numel(negative_images)
+0031        fprintf(<span class="string">'not enought images...\ngetting al available images\n'</span>)
+0032        num_images = numel(negative_images);
+0033    <span class="keyword">end</span>
+0034    
+0035    <span class="keyword">for</span> i=1:num_images
+0036        <span class="keyword">for</span> nrw = 1:num_random_windows
+0037             <span class="comment">% getting random window from negative image</span>
+0038             file_name = <span class="keyword">...</span>
+0039                 strcat(negative_images_path,filesep,negative_images(i).name);
+0040             I = imread(file_name);
+0041             random_image_window = <a href="get_window.html" class="code" title="function image_window = get_window(I,W,H, method)">get_window</a>(I,64,128, <span class="string">'random'</span>);
+0042             
+0043             <span class="comment">% making saving path</span>
+0044             [~, name, ext] = fileparts(file_name);
+0045             file_saving_name = <span class="keyword">...</span>
+0046                 strcat(windows_dst_path, filesep,strcat(name,<span class="string">'_'</span>,sprintf(<span class="string">'%02d'</span>,nrw)),ext);
+0047             
+0048             <span class="comment">% saving image...</span>
+0049             imwrite(random_image_window, file_saving_name);
+0050        <span class="keyword">end</span> 
+0051    <span class="keyword">end</span>
+0052    
+0053     
+0054     
+0055</pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

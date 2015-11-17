@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plot_ROCcurve</title>
+  <meta name="keywords" content="plot_ROCcurve">
+  <meta name="description" content="PLOT_ROCCURVE asks for a svm model file, pos &amp; neg images">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; plot_ROCcurve.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>plot_ROCcurve
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>PLOT_ROCCURVE asks for a svm model file, pos &amp; neg images</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function plot_ROCcurve() </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> PLOT_ROCCURVE asks for a svm model file, pos &amp; neg images 
+               and plots the ROC curve. 
+  
+   ... 
+$ Author: Jose Marcos Rodriguez $ 
+$ Date: 11-Jan-2014 19:05:13 $ 
+$ Revision : 1.00 $ 
+% FILENAME  : plot_ROCcurve.m</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="get_feature_matrix.html" class="code" title="function [labels, train_matrix] = get_feature_matrix(positive_images, negative_images)">get_feature_matrix</a>	GET_FEATURE_MATRIX computes the descriptor matrix for all input images</li><li><a href="get_files.html" class="code" title="function [positive_images, negative_images] = get_files(pos_elems, neg_elems, paths)">get_files</a>	GET_FILES retrieves complete paths to every JPG, PNG or PPM image file.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function plot_ROCcurve()</a>
+0002 <span class="comment">% PLOT_ROCCURVE asks for a svm model file, pos &amp; neg images</span>
+0003 <span class="comment">%               and plots the ROC curve.</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">%   ...</span>
+0006 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0007 <span class="comment">%$ Date: 11-Jan-2014 19:05:13 $</span>
+0008 <span class="comment">%$ Revision : 1.00 $</span>
+0009 <span class="comment">%% FILENAME  : plot_ROCcurve.m</span>
+0010 
+0011 <span class="comment">% load model</span>
+0012 [model_file,full_path,~] = uigetfile(<span class="string">'.\models'</span>,<span class="string">'Select model'</span>);
+0013 model = load([full_path,filesep,model_file]);
+0014 names = fieldnames(model);
+0015 model = getfield(model, names{1});
+0016 
+0017 <span class="comment">% ROC plotting</span>
+0018 [pos_ims, neg_ims] = <a href="get_files.html" class="code" title="function [positive_images, negative_images] = get_files(pos_elems, neg_elems, paths)">get_files</a>(-1,-1);
+0019 [labels, matrix] = <a href="get_feature_matrix.html" class="code" title="function [labels, train_matrix] = get_feature_matrix(positive_images, negative_images)">get_feature_matrix</a>(pos_ims, neg_ims);
+0020 plotroc(labels, matrix, model)</pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

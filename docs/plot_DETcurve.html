@@ -1,0 +1,232 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plot_DETcurve</title>
+  <meta name="keywords" content="plot_DETcurve">
+  <meta name="description" content="PLOT_DETCURVE function to compute de DET plot given a set of models">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; plot_DETcurve.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>plot_DETcurve
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>PLOT_DETCURVE function to compute de DET plot given a set of models</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function plot_DETcurve(models, model_names,pos_path, neg_path) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> PLOT_DETCURVE function to compute de DET plot given a set of models
+
+ INPUT:
+ models: SVM models to test (as a row vector)
+ model_names: names of the models to use it in the DET_plot legends 
+              (as cell array)
+ pos/neg path: path to pos/neg images
+ 
+
+$ Author: Jose Marcos Rodriguez $ 
+$ Date: 09-Nov-2013 22:45:23 $ 
+$ Revision : 1.04 $ 
+% FILENAME  : performance.m</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="compute_HOG.html" class="code" title="function H = compute_HOG(I, cell_size, block_size,n_bins)">compute_HOG</a>	COMPUTE_HOG Computes the HOG descriptor of the given image computed</li><li><a href="get_files.html" class="code" title="function [positive_images, negative_images] = get_files(pos_elems, neg_elems, paths)">get_files</a>	GET_FILES retrieves complete paths to every JPG, PNG or PPM image file.</li><li><a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>	GET_PARAMS retrieve params saved in a .mat file</li><li><a href="get_window.html" class="code" title="function image_window = get_window(I,W,H, method)">get_window</a>	GET_WINDOW Gets a WxH window from the input image (I) with method</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function [p_scores, n_scores] = get_scores(model,pos_path, neg_path)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function plot_DETcurve(models, model_names,pos_path, neg_path)</a>
+0002 <span class="comment">% PLOT_DETCURVE function to compute de DET plot given a set of models</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% INPUT:</span>
+0005 <span class="comment">% models: SVM models to test (as a row vector)</span>
+0006 <span class="comment">% model_names: names of the models to use it in the DET_plot legends</span>
+0007 <span class="comment">%              (as cell array)</span>
+0008 <span class="comment">% pos/neg path: path to pos/neg images</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0012 <span class="comment">%$ Date: 09-Nov-2013 22:45:23 $</span>
+0013 <span class="comment">%$ Revision : 1.04 $</span>
+0014 <span class="comment">%% FILENAME  : performance.m</span>
+0015 
+0016     <span class="comment">% if paths not specified by parameters</span>
+0017     <span class="keyword">if</span> nargin &lt; 3
+0018         pos_path = uigetdir(<span class="string">'.\images'</span>,<span class="string">'Select positive test image path'</span>);
+0019         neg_path = uigetdir(<span class="string">'.\images'</span>,<span class="string">'Select negative test image path'</span>);
+0020 
+0021         <span class="keyword">if</span> isa(neg_path,<span class="string">'double'</span>) || isa(pos_path,<span class="string">'double'</span>)
+0022             cprintf(<span class="string">'Errors'</span>,<span class="string">'Invalid paths...\nexiting...\n\n'</span>)
+0023             <span class="keyword">return</span> 
+0024         <span class="keyword">end</span>
+0025     <span class="keyword">end</span>
+0026 
+0027     det_figure_handler = figure(<span class="string">'name'</span>,<span class="string">'DET curves'</span>);
+0028     set(det_figure_handler,<span class="string">'Visible'</span>,<span class="string">'off'</span>);
+0029     
+0030     det_plot_handlers = zeros(1,max(size(models)));
+0031     
+0032     color = [<span class="string">'b'</span>,<span class="string">'r'</span>,<span class="string">'g'</span>,<span class="string">'y'</span>];
+0033     
+0034     <span class="keyword">for</span> m_index=1:max(size(models))
+0035         hold on;
+0036         model = models(m_index);
+0037         
+0038         <span class="comment">% getting classification scores</span>
+0039         [p_scores, n_scores] = <a href="#_sub1" class="code" title="subfunction [p_scores, n_scores] = get_scores(model,pos_path, neg_path)">get_scores</a>(model,pos_path,neg_path);
+0040 
+0041         <span class="comment">% Plot scores distribution as a Histogram</span>
+0042         positives = max(size(p_scores));
+0043         negatives = max(size(n_scores)); 
+0044         scores = zeros(min(positives, negatives),2);
+0045         <span class="keyword">for</span> i=1:size(scores)
+0046             scores(i,1) = p_scores(i);
+0047             scores(i,2) = n_scores(i);
+0048         <span class="keyword">end</span>
+0049         figure(<span class="string">'name'</span>, sprintf(<span class="string">'model %s scores distribution'</span>,model_names{m_index})); hist(scores);
+0050 
+0051         <span class="comment">% Compute Pmiss and Pfa from experimental detection output scores</span>
+0052         [P_miss,P_fppw] = Compute_DET(p_scores,n_scores);
+0053 
+0054         <span class="comment">% Plot the detection error trade-off</span>
+0055         figure(det_figure_handler);
+0056         thick = 2;
+0057         det_plot_handler = Plot_DET(P_miss,P_fppw,color(m_index)', thick);
+0058         det_plot_handlers(m_index) = det_plot_handler;
+0059 
+0060         <span class="comment">% Plot the optimum point for the detector</span>
+0061         C_miss = 1;
+0062         C_fppw = 1;
+0063         P_target = 0.5;
+0064 
+0065         Set_DCF(C_miss,C_fppw,P_target);
+0066         [DCF_opt, Popt_miss, Popt_fa] = Min_DCF(P_miss,P_fppw);
+0067         fprintf(<span class="string">'Optimal Decision Cost Function for %s = %d\n'</span>,model_names{m_index},DCF_opt)
+0068 
+0069         Plot_DET (Popt_miss,Popt_fa,<span class="string">'ko'</span>);
+0070     <span class="keyword">end</span>
+0071     legend(det_plot_handlers, model_names);
+0072 <span class="keyword">end</span>
+0073 
+0074 
+0075 
+0076 
+0077 <a name="_sub1" href="#_subfunctions" class="code">function [p_scores, n_scores] = get_scores(model,pos_path, neg_path)</a>
+0078     <span class="comment">% Tests a (lib)SVM classifier from the specified images paths</span>
+0079     <span class="comment">%</span>
+0080     <span class="comment">% ok: number of correct classifications</span>
+0081     <span class="comment">% ko: number of wrong classifications</span>
+0082     <span class="comment">% positive / negative images_path: paths of the images to test</span>
+0083     <span class="comment">% model: SVMmodel to use.</span>
+0084     <span class="comment">%</span>
+0085     <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0086     <span class="comment">%$ Date: 2013/11/09 $</span>
+0087     <span class="comment">%$ Revision: 1.2 $</span>
+0088 
+0089     [positive_images, negative_images] = <a href="get_files.html" class="code" title="function [positive_images, negative_images] = get_files(pos_elems, neg_elems, paths)">get_files</a>(-1,-1,{pos_path,neg_path});
+0090     total_pos_windows = numel(positive_images);
+0091     total_neg_windows = numel(negative_images);
+0092     
+0093     
+0094     <span class="comment">%% Init the svm test variables</span>
+0095     params = <a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>(<span class="string">'det_plot_params'</span>);
+0096     chunk_size = params.chunk_size;
+0097     desc_size = params.desc_size;
+0098     params = <a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>(<span class="string">'window_params'</span>);
+0099     im_h_size = params.height;
+0100     im_w_size = params.width;
+0101     im_c_depth = params.color_depth;
+0102     
+0103     <span class="comment">% ====================================================================</span>
+0104     <span class="comment">%% Reading all POSITIVE images</span>
+0105     <span class="comment">% (64x128 images)</span>
+0106     <span class="comment">% ====================================================================</span>
+0107     
+0108     <span class="comment">% SVM scores</span>
+0109     p_scores = zeros(total_pos_windows,1);
+0110   
+0111     i = 0;
+0112     <span class="keyword">while</span> i &lt; numel(positive_images)
+0113     
+0114     <span class="comment">%% window obtainment</span>
+0115        this_chunk = min(chunk_size,numel(positive_images)-i);
+0116        windows = uint8(zeros(im_h_size,im_w_size,im_c_depth,this_chunk));
+0117        hogs = zeros(this_chunk, desc_size);
+0118        labels = ones(size(hogs,1),1);
+0119        <span class="keyword">for</span> l=1:this_chunk
+0120             I = imread(positive_images(i+1).name);
+0121             windows(:,:,:,l) = <a href="get_window.html" class="code" title="function image_window = get_window(I,W,H, method)">get_window</a>(I,im_w_size,im_h_size,<span class="string">'center'</span>);
+0122             hogs(l,:) = <a href="compute_HOG.html" class="code" title="function H = compute_HOG(I, cell_size, block_size,n_bins)">compute_HOG</a>(windows(:,:,:,l),8,2,9);
+0123             i = i+1;
+0124        <span class="keyword">end</span>
+0125        
+0126        <span class="comment">% just for fixing GUI freezing due to unic thread MatLab issue</span>
+0127        drawnow; 
+0128 
+0129        <span class="comment">%% prediction</span>
+0130        [~, ~, scores] = <span class="keyword">...</span>
+0131             svmpredict(labels, hogs, model, <span class="string">'-b 0'</span>);
+0132         
+0133         p_scores(i-this_chunk+1:i,:) = scores(:,:); 
+0134     
+0135     <span class="keyword">end</span>
+0136     
+0137     <span class="comment">% ====================================================================</span>
+0138     <span class="comment">%% Reading all NEGATIVE images</span>
+0139     <span class="comment">% (64x128 windows)</span>
+0140     <span class="comment">% ====================================================================</span>
+0141 
+0142     n_scores = zeros(total_neg_windows,1);
+0143     
+0144     i = 0;
+0145     <span class="keyword">while</span> i &lt; numel(negative_images)
+0146     
+0147     <span class="comment">%% window obtainment</span>
+0148        this_chunk = min(chunk_size,numel(negative_images)-i);
+0149        windows = uint8(zeros(im_h_size,im_w_size,im_c_depth,this_chunk));
+0150        hogs = zeros(this_chunk, desc_size);
+0151        labels = ones(size(hogs,1),1)*(-1);
+0152        <span class="keyword">for</span> l=1:this_chunk
+0153             I = imread(negative_images(i+1).name);
+0154             windows(:,:,:,l) = <a href="get_window.html" class="code" title="function image_window = get_window(I,W,H, method)">get_window</a>(I,im_w_size,im_h_size,[1,1]);
+0155             hogs(l,:) = <a href="compute_HOG.html" class="code" title="function H = compute_HOG(I, cell_size, block_size,n_bins)">compute_HOG</a>(windows(:,:,:,l),8,2,9);
+0156             i = i+1;
+0157        <span class="keyword">end</span>
+0158        
+0159        <span class="comment">% just for fixing GUI freezing due to unic thread MatLab issue</span>
+0160        drawnow; 
+0161 
+0162        <span class="comment">%% prediction</span>
+0163        [~, ~, scores] = <span class="keyword">...</span>
+0164             svmpredict(labels, hogs, model, <span class="string">'-b 0'</span>);
+0165         
+0166         n_scores(i-this_chunk+1:i,:) = scores(:,:); 
+0167     
+0168     
+0169     <span class="keyword">end</span>
+0170 <span class="keyword">end</span>
+0171</pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

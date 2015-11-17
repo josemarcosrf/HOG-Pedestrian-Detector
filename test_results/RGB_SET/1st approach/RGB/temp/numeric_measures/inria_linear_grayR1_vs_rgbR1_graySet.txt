@@ -1,0 +1,27 @@
+--> grayR1 (opt):
+
+oks: 2381 
+kos: 104 
+false positives: 10 
+false negatives: 94 
+true positives: 1032 
+true negatives: 1349 
+mis rate: 8.348135e-02 
+fppw: 4.024145e-03 
+Precision: 9.904031e-01 
+Recall: 9.165187e-01 
+F score: 9.520295e-01 
+
+--> rgbR1:
+
+oks: 2379 
+kos: 106 
+false positives: 7 
+false negatives: 99 
+true positives: 1027 
+true negatives: 1352 
+mis rate: 8.792185e-02 
+fppw: 2.816901e-03 
+Precision: 9.932302e-01 
+Recall: 9.120782e-01 
+F score: 9.509259e-01 

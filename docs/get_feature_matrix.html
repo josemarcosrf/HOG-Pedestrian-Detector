@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of get_feature_matrix</title>
+  <meta name="keywords" content="get_feature_matrix">
+  <meta name="description" content="GET_FEATURE_MATRIX computes the descriptor matrix for all input images">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; get_feature_matrix.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>get_feature_matrix
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>GET_FEATURE_MATRIX computes the descriptor matrix for all input images</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [labels, train_matrix] = get_feature_matrix(positive_images, negative_images) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> GET_FEATURE_MATRIX computes the descriptor matrix for all input images 
+ 
+ OUTPUTS:
+       labels: column matrix with 1 in positives images and -1 in negatives
+       train_matrix: descriptor/feature matrix. 
+                       num. Rows = num. instances, 
+                       num. columns = feature dimension</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="compute_HOG.html" class="code" title="function H = compute_HOG(I, cell_size, block_size,n_bins)">compute_HOG</a>	COMPUTE_HOG Computes the HOG descriptor of the given image computed</li><li><a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>	GET_PARAMS retrieve params saved in a .mat file</li><li><a href="get_window.html" class="code" title="function image_window = get_window(I,W,H, method)">get_window</a>	GET_WINDOW Gets a WxH window from the input image (I) with method</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="plot_ROCcurve.html" class="code" title="function plot_ROCcurve()">plot_ROCcurve</a>	PLOT_ROCCURVE asks for a svm model file, pos & neg images</li><li><a href="plot_tsne_map.html" class="code" title="function mappedX = plot_tsne_map(nPos, nNeg, paths)">plot_tsne_map</a>	PLOT_TSNE_MAP plots a 2D map of the multi-dimensional spatial</li><li><a href="train_svm.html" class="code" title="function new_model = train_svm(model_name, paths)">train_svm</a>	TRAIN_SVM Train an SVM classifier with the specified images.</li><li><a href="train_svm_PCA.html" class="code" title="function [new_model,Ureduce] = train_svm_PCA(model_name, paths)">train_svm_PCA</a>	TRAIN_SVM_PCA Train an SVM classifier with the specified images.</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [labels, train_matrix] = get_feature_matrix(positive_images, negative_images)</a>
+0002 <span class="comment">% GET_FEATURE_MATRIX computes the descriptor matrix for all input images</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% OUTPUTS:</span>
+0005 <span class="comment">%       labels: column matrix with 1 in positives images and -1 in negatives</span>
+0006 <span class="comment">%       train_matrix: descriptor/feature matrix.</span>
+0007 <span class="comment">%                       num. Rows = num. instances,</span>
+0008 <span class="comment">%                       num. columns = feature dimension</span>
+0009 
+0010 <span class="comment">%$ Author: Jose Marcos Rodriguez $</span>
+0011 <span class="comment">%$ Date: 25-Dec-2013 21:26:49 $</span>
+0012 <span class="comment">%$ Revision : 1.00 $</span>
+0013 <span class="comment">%% FILENAME  : get_feature_matrix.m</span>
+0014 
+0015     <span class="comment">%% Init the svm training matrix</span>
+0016     desc_params = <a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>(<span class="string">'desc_params'</span>);
+0017     cell_size = desc_params.cell_size;
+0018     block_size = desc_params.block_size;
+0019     n_bins = desc_params.n_bins;
+0020     w_params = <a href="get_params.html" class="code" title="function params = get_params(file_name)">get_params</a>(<span class="string">'window_params'</span>);
+0021     width = w_params.width;
+0022     height = w_params.height;
+0023     
+0024     num_pos_images = numel(positive_images);
+0025     num_neg_images = numel(negative_images);
+0026     total_images = num_pos_images + num_neg_images;
+0027     labels = zeros(total_images,1);
+0028 
+0029     desp = 1;
+0030     n_v_cells = floor(height/cell_size);
+0031     n_h_cells = floor(width/cell_size);
+0032     hist_size = block_size*block_size*n_bins;
+0033     descriptor_size = hist_size*(n_v_cells-block_size+desp)*(n_h_cells-block_size+desp);
+0034     train_matrix = zeros(total_images,descriptor_size);
+0035 
+0036 
+0037     
+0038     <span class="comment">% =====================================================================</span>
+0039     <span class="comment">%% Reading all POSITIVE images &amp; computing the descriptor</span>
+0040     <span class="comment">% (64x128 images)</span>
+0041     <span class="comment">% =====================================================================</span>
+0042     pos_start_time = tic;
+0043     <span class="keyword">for</span> i=1:num_pos_images
+0044        I = imread(positive_images(i).name);
+0045        train_matrix(i,:) = <a href="compute_HOG.html" class="code" title="function H = compute_HOG(I, cell_size, block_size,n_bins)">compute_HOG</a>(<a href="get_window.html" class="code" title="function image_window = get_window(I,W,H, method)">get_window</a>(I,width,height,<span class="string">'center'</span>),cell_size,block_size,n_bins);
+0046        labels(i) = 1.0;
+0047     <span class="keyword">end</span>
+0048 
+0049     <span class="comment">% (positive) hog extraction elapsed time</span>
+0050     pos_elapsed_time = toc(pos_start_time);
+0051     fprintf(<span class="string">'Elapsed time to extract positive image... HOG''s: %f seconds.\n'</span>,pos_elapsed_time);
+0052 
+0053 
+0054     <span class="comment">% =====================================================================</span>
+0055     <span class="comment">%% Reading all NEGATIVE images &amp; computing the descriptor</span>
+0056     <span class="comment">% (random 64x128 window)</span>
+0057     <span class="comment">% =====================================================================</span>
+0058     neg_start_time = tic;
+0059     index = num_pos_images;
+0060     <span class="keyword">for</span> i=1:num_neg_images
+0061        I = imread(negative_images(i).name);
+0062        index = index+1;
+0063        train_matrix(index,:) = <a href="compute_HOG.html" class="code" title="function H = compute_HOG(I, cell_size, block_size,n_bins)">compute_HOG</a>(<a href="get_window.html" class="code" title="function image_window = get_window(I,W,H, method)">get_window</a>(I,width,height,<span class="string">'center'</span>),cell_size,block_size,n_bins);
+0064        labels(index) = -1.0;
+0065    <span class="keyword">end</span>
+0066 
+0067     <span class="comment">% (negative) hog extraction elapsed time</span>
+0068     neg_elapsed_time = toc(neg_start_time);
+0069     fprintf(<span class="string">'Elapsed time to extract negative image HOG''s: %f seconds.\n'</span>,neg_elapsed_time);
+0070 
+0071     fprintf(<span class="string">'Training matrix info:\n'</span>);
+0072     whos(<span class="string">'train_matrix'</span>)
+0073</pre></div>
+<hr><address>Generated on Sat 15-Mar-2014 14:08:05 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>
