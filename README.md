@@ -50,7 +50,7 @@ There are several entry points to the project, but here the two main ones are sh
 Assuming there's a `models` directory where trained models will be saved and that the positive and negative images can be found in `dataset/Test/pos` and `dataset/Test/neg` respectively.
 Train an SVM model named `test`
 ```matlab
-model = train_svm("test", ["./models", "dataset/Test/pos" "dataset/Test/neg"]);
+model = train_svm("test", ["./models", "dataset/Train/pos" "dataset/Train/neg"]);
 ```
 
 ### Eval
@@ -65,7 +65,7 @@ Note `test_svm` expects `model.<model-given-name-to-train-function>`...
 ### PCA versions of train / test
 
 ```matlab
-[model, Ureduce] = train_svm_PCA("test_pca", ["./models", "dataset/Test/pos" "dataset/Test/neg"]);
+[model, Ureduce] = train_svm_PCA("test_pca", ["./models", "dataset/Train/pos" "dataset/Train/neg"]);
 test_svm_PCA(model.test_pca, Ureduce, ["dataset/Test/pos", "dataset/Test/neg"]);
 ```
 
@@ -73,7 +73,7 @@ test_svm_PCA(model.test_pca, Ureduce, ["dataset/Test/pos", "dataset/Test/neg"]);
 
 ## Known issues & contributions
 
-Old MATLAB version used to concatenate strings by enclosing them between squared brackets but doesn't look like valid any longer. In that case you should use the `join` function. For example when constructing paths, so:
+Old MATLAB version used to concatenate strings by enclosing them between squared brackets but doesn't look like valid any longer. In that case you should use the `strcat` function. For example when constructing paths, so:
 
 ```matlab
 path = ['folder', 'filename', '.extension']  % this is wrong!
