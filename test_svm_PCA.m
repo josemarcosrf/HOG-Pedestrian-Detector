@@ -24,8 +24,8 @@ function statistics = test_svm_PCA(model,Ureduce, paths)
 
     % path stuff
     if nargin < 3
-        positive_images_path = uigetdir('images','Select positive image folder');
-        negative_images_path = uigetdir('images','Select negative image folder');
+        positive_images_path = uigetdir('dataset','Select positive image folder');
+        negative_images_path = uigetdir('dataset','Select negative image folder');
         if safe
           images_path = uigetdir('images','Select base image path');
         end
@@ -99,9 +99,9 @@ function statistics = test_svm_PCA(model,Ureduce, paths)
                 % saving hard image for further retrain
                 if safe
                     [~, name, ext] = fileparts(positive_images(i).name);
-                    saving_path = [images_path,'/hard_examples/false_neg/',...
+                    saving_path = join(images_path,'/hard_examples/false_neg/',...
                                    name,...
-                                   '_n_wind_',num2str(l), ext];
+                                   '_n_wind_',num2str(l), ext);
                                
                    % writting image 
                    imwrite(windows(:,:,:,l), saving_path); 

@@ -62,7 +62,7 @@ function [new_model,Ureduce] = train_svm_PCA(model_name, paths)
     svm_params = ...
         cross_validate(kernel_type,cost_range,gamma_range,...
                        train_matrix, labels, ...
-                       [model_save_path,filesep,model_name]);
+                       strcat(model_save_path,filesep,model_name));
 
     
     % just for fixing GUI freezing due to unic thread MatLab issue
@@ -78,11 +78,11 @@ function [new_model,Ureduce] = train_svm_PCA(model_name, paths)
     svm_elapsed = toc(svm_start);
     fprintf('SVM training done in: %f seconds.\n',svm_elapsed);
     
-    fprintf(['Saving model in ',model_save_path, model_name, '.mat','\n']);
-    save([model_save_path,filesep,model_name, '.mat'], '-struct','new_model',model_name);
+    fprintf(strcat('Saving model in ',model_save_path, model_name, '.mat','\n'));
+    save(strcat(model_save_path,filesep,model_name, '.mat'), '-struct','new_model',model_name);
     
-    fprintf(['Saving Reduced Singular Vectors matrix in ',model_save_path, model_name, '_reduced_SVs.mat','\n']);
-    save([model_save_path,filesep,model_name, '_reduced_SVs.mat'], 'Ureduce');
+    fprintf(strcat('Saving Reduced Singular Vectors matrix in ',model_save_path, model_name, '_reduced_SVs.mat','\n'));
+    save(strcat(model_save_path,filesep,model_name, '_reduced_SVs.mat'), 'Ureduce');
 
 
 end

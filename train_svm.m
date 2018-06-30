@@ -19,8 +19,8 @@ function new_model = train_svm(model_name, paths)
     %% path stuff
     if nargin < 2
         model_save_path = uigetdir('.models','Select model save folder');
-        positive_images_path = uigetdir('.images','Select positive image folder');
-        negative_images_path = uigetdir('.images','Select negative image folder');
+        positive_images_path = uigetdir('dataset','Select positive image folder');
+        negative_images_path = uigetdir('dataset','Select negative image folder');
         
         if isa(model_save_path,'double')  || ...
            isa(positive_images_path,'double')  || ...
@@ -53,12 +53,14 @@ function new_model = train_svm(model_name, paths)
     train_params = get_params('train_svm_params');  
     kernel_type = train_params.kernel;
     cost_range = train_params.cost_range;
-    gamma_range = train_params.gamma_range; 
+    gamma_range = train_params.gamma_range;
+    
+    disp(train_params);
     
     svm_params = ...
         cross_validate(kernel_type,cost_range,gamma_range,...
                        train_matrix, labels, ...
-                       [model_save_path,filesep,model_name]);
+                       strcat(model_save_path,filesep,model_name));
 
     
     % just for fixing GUI freezing due to unic thread MatLab issue
@@ -74,8 +76,8 @@ function new_model = train_svm(model_name, paths)
     svm_elapsed = toc(svm_start);
     fprintf('SVM training done in: %f seconds.\n',svm_elapsed);
     
-    fprintf(['Saving model in ',model_save_path, model_name, '.mat','\n']);
-    save([model_save_path,filesep,model_name, '.mat'], '-struct','new_model',model_name);
+    fprintf(strcat('Saving model in ',model_save_path, model_name, '.mat','\n'));
+    save(strcat(model_save_path,filesep,model_name, '.mat'), '-struct','new_model',model_name);
 
 
 end

@@ -40,7 +40,7 @@ function svm_params = cross_validate(kernel_type, cost_range, gamma_range, train
                 fprintf('<gamma=%d, cost=%d> \n\n',g,c);
                 
                 % writing crossvalidation log file
-                log_file = fopen([model_save_path,'.cv'],'a');
+                log_file = fopen(strcat(model_save_path,'.cv'),'a');
                 fprintf(log_file, sprintf('<gamma=%f, cost=%f>: acc=%f \n\n',g,c,cv));
                 fclose(log_file);
 
@@ -88,7 +88,7 @@ function svm_params = cross_validate(kernel_type, cost_range, gamma_range, train
             fprintf('<cost=%d> \n\n',c);
             
             % writing crossvalidation log file
-            log_file = fopen([model_save_path,'.cv'],'a');
+            log_file = fopen(strcat(model_save_path, '.cv'),'a');
             fprintf(log_file, sprintf('<cost=%f>: acc=%f \n\n',c, cv));
             fclose(log_file);
             
