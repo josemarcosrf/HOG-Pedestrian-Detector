@@ -1,4 +1,9 @@
 # HOG-Pedestrian-Detector
+
+
+![CRAN](https://img.shields.io/cran/l/devtools.svg)
+
+
 This repository contains the code for a MATLAB implementation of a basic HOG + SVM pedestrian detector form my Computer Science Master [thesis](https://upcommons.upc.edu/bitstream/handle/2099.1/21343/95066.pdf?sequence=1&isAllowed=y)
 
 ## Disclaimer
