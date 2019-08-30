@@ -2,6 +2,7 @@
 
 
 ![CRAN](https://img.shields.io/cran/l/devtools.svg)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjmrf%2FHOG-Pedestrian-Detector.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjmrf%2FHOG-Pedestrian-Detector?ref=badge_shield)
 
 
 This repository contains the code for a MATLAB implementation of a basic HOG + SVM pedestrian detector form my Computer Science Master [thesis](https://upcommons.upc.edu/bitstream/handle/2099.1/21343/95066.pdf?sequence=1&isAllowed=y)
@@ -91,3 +92,7 @@ If you enjoyed this repository and find things that are not working any longer, 
 
 
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjmrf%2FHOG-Pedestrian-Detector.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjmrf%2FHOG-Pedestrian-Detector?ref=badge_large)
